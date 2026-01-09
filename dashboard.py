@@ -18,7 +18,7 @@ import logging
 import pytz
 
 # Configuration for Raspberry Pi deployment
-VERSION = "7.0.14-admin-network-renaming-pi"
+VERSION = "8.0.0-interface-controls-boot-notifications"
 LOCAL_DIR = Path.home() / ".eero-dashboard"
 CONFIG_FILE = LOCAL_DIR / "config.json"
 TOKEN_FILE = LOCAL_DIR / ".eero_token"

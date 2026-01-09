@@ -1,8 +1,31 @@
-# Eero Network Dashboard for Raspberry Pi
+# eero Dashboard Pi - Version 8.0
 
-A professional network monitoring dashboard designed specifically for Raspberry Pi deployment. Monitor multiple Eero networks with real-time device tracking, AP capacity visualization, and kiosk mode for digital signage.
+**Professional Network Monitoring Dashboard for Raspberry Pi**
+
+[![Version](https://img.shields.io/badge/version-8.0.0-blue.svg)](https://github.com/Drew-CodeRGV/eero-dashboard-pi)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-red.svg)](https://www.raspberrypi.org/)
+
+A comprehensive, professional-grade network monitoring dashboard designed specifically for Raspberry Pi deployment. Monitor your eero networks with real-time device tracking, access point capacity visualization, and advanced management features.
+
+## 🚀 Version 8.0 - Major Release
+
+**New in Version 8.0:**
+- 🔐 **Interface Access Controls** - Control dashboard access via wired/wireless interfaces
+- 📧 **Enhanced Boot Notifications** - HTML emails with clickable dashboard links
+- 🗑️ **Network Data Purging** - Complete cleanup when networks are deleted
+- 🎨 **Enhanced Admin Panel** - Professional layout with organized sections
+- ⚡ **Lightning-Fast Deployment** - 2-3 minute deployment with email notifications
 
 ## 🚀 Features
+
+### **Version 8.0 New Features**
+- **Interface Access Controls**: Control dashboard access via wired/wireless/external networks
+- **Enhanced Boot Notifications**: HTML emails with clickable dashboard links for instant access
+- **Network Data Purging**: Complete cleanup of logs, tokens, and cache when networks are deleted
+- **Professional Admin Panel**: Organized sections for System, Network, and Display management
+- **Real-time Testing**: Test interface configurations before applying changes
+- **Deployment Optimization**: 2-3 minute deployment with automated email notifications
 
 ### **Core Dashboard**
 - **Real-time Network Monitoring**: Live device counts, OS distribution, frequency analysis
