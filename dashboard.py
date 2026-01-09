@@ -1077,176 +1077,6 @@ def authenticate_network(network_id):
         logging.error(f"Network authentication error for {network_id}: {str(e)}")
         return jsonify({'success': False, 'message': f'Authentication error: {str(e)}'}), 500
 
-# Background cache update thread
-def background_cache_update():
-    """Background thread to update cache every 60 seconds"""
-    while True:
-        try:
-            time.sleep(60)  # Update every 60 seconds
-            update_cache()
-        except Exception as e:
-            logging.error(f"Background cache update error: {str(e)}")
-
-# Start background thread
-import threading
-cache_thread = threading.Thread(target=background_cache_update, daemon=True)
-cache_thread.start()
-
-if __name__ == '__main__':
-    logging.info(f"Starting Eero Dashboard {VERSION} for Raspberry Pi")
-    logging.info(f"Configuration directory: {LOCAL_DIR}")
-    logging.info(f"Template file: {TEMPLATE_FILE}")
-    
-    # Initial cache update
-    update_cache()
-    
-    # Start Flask app optimized for Pi
-    app.run(
-        host='0.0.0.0',  # Allow external connections
-        port=5000,
-        debug=False,     # Disable debug mode for production
-        threaded=True,   # Enable threading for better performance
-        use_reloader=False  # Disable reloader for systemd service
-    )
-                network['name'] = new_name
-                config['networks'] = networks
-                
-                if save_config(config):
-                    return jsonify({
-                        'success': True, 
-                        'message': f'Network renamed from "{old_name}" to "{new_name}"',
-                        'network': network
-                    })
-                
-                return jsonify({'success': False, 'message': 'Failed to save configuration'}), 500
-        
-        return jsonify({'success': False, 'message': 'Network not found'}), 404
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/admin/networks/<network_id>/toggle', methods=['POST'])
-def toggle_network(network_id):
-    """Toggle network active status"""
-    try:
-        config = load_config()
-        networks = config.get('networks', [])
-        
-        # Find and toggle network
-        for network in networks:
-            if network.get('id') == network_id:
-                network['active'] = not network.get('active', True)
-                config['networks'] = networks
-                
-                if save_config(config):
-                    status = 'enabled' if network['active'] else 'disabled'
-                    return jsonify({'success': True, 'message': f'Network {network_id} {status}'})
-                
-                return jsonify({'success': False, 'message': 'Failed to save configuration'}), 500
-        
-        return jsonify({'success': False, 'message': 'Network not found'}), 404
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/admin/networks/<network_id>/auth', methods=['POST'])
-def authenticate_network(network_id):
-    """Authenticate a specific network with real Eero API"""
-    try:
-        data = request.get_json()
-        step = data.get('step', 'send')
-        
-        # Find network
-        config = load_config()
-        networks = config.get('networks', [])
-        network = next((n for n in networks if n.get('id') == network_id), None)
-        
-        if not network:
-            return jsonify({'success': False, 'message': 'Network not found'}), 404
-        
-        if step == 'send':
-            # Allow email to be provided in request, fallback to stored email
-            email = data.get('email', '').strip()
-            if not email:
-                email = network.get('email', '')
-            
-            if not email:
-                return jsonify({'success': False, 'message': 'Email address required for authentication'}), 400
-            
-            if '@' not in email:
-                return jsonify({'success': False, 'message': 'Invalid email address'}), 400
-            
-            logging.info(f"Sending verification code to {email} for network {network_id}")
-            response = requests.post(
-                f"https://{eero_api.api_url}/2.2/pro/login",
-                json={"login": email},
-                timeout=10
-            )
-            response.raise_for_status()
-            response_data = response.json()
-            
-            if 'data' not in response_data or 'user_token' not in response_data['data']:
-                return jsonify({'success': False, 'message': 'Failed to generate token'}), 500
-            
-            # Store temporary token
-            temp_token_file = LOCAL_DIR / f".eero_token_{network_id}.temp"
-            with open(temp_token_file, 'w') as f:
-                f.write(response_data['data']['user_token'])
-            temp_token_file.chmod(0o600)
-            
-            return jsonify({'success': True, 'message': f'Verification code sent to {email}'})
-            
-        elif step == 'verify':
-            code = data.get('code', '').strip()
-            if not code:
-                return jsonify({'success': False, 'message': 'Code required'}), 400
-            
-            temp_token_file = LOCAL_DIR / f".eero_token_{network_id}.temp"
-            if not temp_token_file.exists():
-                return jsonify({'success': False, 'message': 'Please restart authentication process'}), 400
-            
-            with open(temp_token_file, 'r') as f:
-                token = f.read().strip()
-            
-            # Verify code with real Eero API
-            verify_response = requests.post(
-                f"https://{eero_api.api_url}/2.2/login/verify",
-                headers={"X-User-Token": token, "Content-Type": "application/x-www-form-urlencoded"},
-                data={"code": code},
-                timeout=10
-            )
-            verify_response.raise_for_status()
-            verify_data = verify_response.json()
-            
-            if (verify_data.get('data', {}).get('email', {}).get('verified') or 
-                verify_data.get('data', {}).get('verified') or
-                verify_response.status_code == 200):
-                
-                # Save permanent token
-                token_file = LOCAL_DIR / f".eero_token_{network_id}"
-                with open(token_file, 'w') as f:
-                    f.write(token)
-                token_file.chmod(0o600)
-                
-                # Clean up temp file
-                if temp_token_file.exists():
-                    temp_token_file.unlink()
-                
-                # Update in-memory tokens
-                eero_api.network_tokens[network_id] = token
-                
-                logging.info(f"Authentication successful for network {network_id}")
-                return jsonify({'success': True, 'message': f'Network {network_id} authenticated successfully!'})
-            else:
-                return jsonify({'success': False, 'message': 'Verification failed. Please check the code.'}), 400
-            
-    except requests.RequestException as e:
-        logging.error(f"Network authentication error for {network_id}: {str(e)}")
-        return jsonify({'success': False, 'message': f'Network error: {str(e)}'}), 500
-    except Exception as e:
-        logging.error(f"Network authentication error for {network_id}: {str(e)}")
-        return jsonify({'success': False, 'message': f'Authentication error: {str(e)}'}), 500
-
 @app.route('/api/admin/kiosk-settings', methods=['GET'])
 def get_kiosk_settings():
     """Get kiosk mode settings"""
@@ -1726,57 +1556,36 @@ def create_default_config():
         print(f"✅ Created default config: {CONFIG_FILE}")
 
 if __name__ == '__main__':
+    print(f"🚀 Starting MiniRack Dashboard {VERSION} (Simple Local macOS)")
+    print(f"📁 Config directory: {LOCAL_DIR}")
+    print(f"🌐 Dashboard: http://localhost:3001")
+    print("📱 Mobile responsive design enabled")
+    print("🔧 Press Ctrl+C to stop")
+    print("")
+    
+    # Create default config if needed
+    create_default_config()
+    
+    # Initial cache update
     try:
-        # Log startup information
-        logging.info(f"Starting Eero Dashboard v{VERSION}")
+        update_cache()
+        logging.info("Initial cache update complete")
+    except Exception as e:
+        logging.warning("Initial cache update failed: " + str(e))
+    
+    # Start Flask app optimized for Pi
+    try:
+        logging.info(f"Starting Eero Dashboard {VERSION} for Raspberry Pi")
         logging.info(f"Configuration directory: {LOCAL_DIR}")
         logging.info(f"Template file: {TEMPLATE_FILE}")
         
-        # Check if template file exists
-        if not TEMPLATE_FILE.exists():
-            logging.error(f"Template file not found: {TEMPLATE_FILE}")
-            sys.exit(1)
-        
-        # Create default config if needed
-        create_default_config()
-        
-        # Get host IP for network access
-        import socket
-        try:
-            hostname = socket.gethostname()
-            local_ip = socket.gethostbyname(hostname)
-        except:
-            local_ip = "localhost"
-        
-        print("\n" + "="*60)
-        print("🥧 Eero Dashboard for Raspberry Pi")
-        print(f"📊 Version: {VERSION}")
-        print("="*60)
-        print(f"🌐 Local Access:  http://localhost:5000")
-        print(f"🌐 Network Access: http://{local_ip}:5000")
-        print(f"📁 Config Dir:    {LOCAL_DIR}")
-        print(f"📝 Logs:          {LOCAL_DIR}/dashboard.log")
-        print("="*60)
-        print("🚀 Dashboard starting...")
-        print("💡 Press Ctrl+C to stop")
-        print("="*60 + "\n")
-        
-        # Initial cache update
-        try:
-            update_cache()
-            logging.info("Initial cache update complete")
-        except Exception as e:
-            logging.warning("Initial cache update failed: " + str(e))
-        
-        # Start Flask app
         app.run(
-            host='0.0.0.0',  # Allow network access
+            host='0.0.0.0',  # Allow external connections
             port=5000,
             debug=False,     # Disable debug mode for production
             threaded=True,   # Enable threading for better performance
-            use_reloader=False  # Disable reloader to prevent issues with systemd
+            use_reloader=False  # Disable reloader for systemd service
         )
-        
     except KeyboardInterrupt:
         logging.info("Dashboard stopped by user")
         print("\n🛑 Dashboard stopped")
