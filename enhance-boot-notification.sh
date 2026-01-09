@@ -7,6 +7,14 @@ set -e
 
 echo "🚀 Enhancing Boot Notification and Network Management..."
 
+# Ensure boot notification service is installed
+if [[ ! -f "/etc/systemd/system/boot-notification.service" ]] && [[ -f "boot-notification.service" ]]; then
+    echo "📦 Installing boot notification service..."
+    sudo cp boot-notification.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    echo "✅ Boot notification service installed"
+fi
+
 # Check if we're in the correct directory
 if [[ ! -f "dashboard.py" ]]; then
     echo "❌ dashboard.py not found. Please run this script from the eero-dashboard directory."
@@ -92,7 +100,7 @@ enhanced_function = '''def send_boot_notification(test_mode=False):
         primary_ip = primary_wireless_ip or primary_wired_ip or 'N/A'
         
         # Create email content
-        subject = f"{'[TEST] ' if test_mode else ''}🚀 Eero Dashboard Ready - {hostname}"
+        subject = f"{'[TEST] ' if test_mode else ''}🚀 eero Dashboard Ready - {hostname}"
         
         # HTML email body with clickable links
         html_body = f"""
@@ -114,7 +122,7 @@ enhanced_function = '''def send_boot_notification(test_mode=False):
 </head>
 <body>
     <div class="header">
-        <h1>🚀 Eero Dashboard Ready!</h1>
+        <h1>🚀 eero Dashboard Ready!</h1>
         <p>Your Raspberry Pi dashboard is online and ready to use</p>
     </div>
     
@@ -190,7 +198,7 @@ enhanced_function = '''def send_boot_notification(test_mode=False):
     </div>
     
     <div class="footer">
-        <p>This is an automated notification from your Eero Dashboard on {hostname}</p>
+        <p>This is an automated notification from your eero Dashboard on {hostname}</p>
         <p>Dashboard ready for immediate use • SSH enabled • Web services running</p>
     </div>
 </body>
@@ -199,7 +207,7 @@ enhanced_function = '''def send_boot_notification(test_mode=False):
         
         # Plain text version for email clients that don't support HTML
         text_body = f"""
-Eero Dashboard Boot Notification
+eero Dashboard Boot Notification
 {'='*40}
 
 Hostname: {hostname}
@@ -242,7 +250,7 @@ Quick Setup:
 
 Status: {'Test notification' if test_mode else 'Dashboard started successfully'}
 
-This is an automated notification from your Eero Dashboard.
+This is an automated notification from your eero Dashboard.
 """
         
         # Create message
@@ -454,7 +462,7 @@ cat > deployment-ready.sh << 'EOF'
 
 set -e
 
-echo "🚀 Preparing Eero Dashboard for Deployment..."
+echo "🚀 Preparing eero Dashboard for Deployment..."
 
 # Ensure all services are enabled for boot
 echo "🔧 Enabling services for automatic startup..."
