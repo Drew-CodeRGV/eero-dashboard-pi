@@ -102,19 +102,19 @@ if sudo systemctl is-active --quiet eero-dashboard; then
     IP_ADDRESS=$(hostname -I | awk '{print $1}')
     echo
     echo "🚀 Access your dashboard:"
-    echo "   Local:  http://localhost:5000"
-    echo "   Remote: http://$IP_ADDRESS:5000"
+    echo "   Local:  http://localhost"
+    echo "   Remote: http://$IP_ADDRESS"
     echo
     
     # Test HTTP response
     sleep 2
-    if curl -s http://localhost:5000/health > /dev/null 2>&1; then
+    if curl -s http://localhost:80/health > /dev/null 2>&1; then
         print_success "✅ Dashboard is responding!"
         echo
         echo "🎯 Dashboard is fully operational!"
     else
         print_status "Service running, dashboard may need a moment to start..."
-        echo "   Check in a few seconds: http://$IP_ADDRESS:5000"
+        echo "   Check in a few seconds: http://$IP_ADDRESS"
     fi
 else
     print_error "❌ Service failed to start"

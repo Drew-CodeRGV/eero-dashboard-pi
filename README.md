@@ -71,8 +71,8 @@ chmod +x setup.sh
 
 ### **1. Initial Setup**
 After installation, the dashboard will be available at:
-- **Local**: http://localhost:5000
-- **Network**: http://[pi-ip-address]:5000
+- **Local**: http://localhost
+- **Network**: http://[pi-ip-address]
 
 ### **2. Configure Networks**
 1. Click the **π** button to open admin panel
@@ -149,9 +149,7 @@ sudo journalctl -u eero-dashboard -f
 - **Logs**: `~/.eero-dashboard/dashboard.log`
 
 ### **Port Configuration**
-Default port is 5000. To change:
-1. Edit `dashboard.py` and modify `app.run(port=5000)`
-2. Restart service: `sudo systemctl restart eero-dashboard`
+The dashboard runs on port 80 (standard HTTP port) by default. This requires the service to run as root for security reasons. The systemd service is configured to handle this automatically.
 
 ## 🔒 Security
 
@@ -209,7 +207,7 @@ sudo journalctl -u eero-dashboard -n 50
 **Can't access from other devices:**
 ```bash
 # Check if service is running on correct port
-sudo netstat -tlnp | grep :5000
+sudo netstat -tlnp | grep :80
 
 # Check firewall (if enabled)
 sudo ufw status

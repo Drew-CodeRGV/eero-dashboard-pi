@@ -119,7 +119,7 @@ echo
 
 # 5. Network and Port Check
 print_header "🌐 NETWORK CHECK"
-run_diagnostic "Port 5000 Usage" "sudo netstat -tlnp | grep :5000 || echo 'Port 5000 is free'"
+run_diagnostic "Port 80 Usage" "sudo netstat -tlnp | grep :80 || echo 'Port 80 is free'"
 run_diagnostic "Network Connectivity" "ping -c 2 8.8.8.8"
 run_diagnostic "HTTPS Connectivity" "curl -s -o /dev/null -w '%{http_code}' https://api-user.e2ro.com || echo 'HTTPS test failed'"
 echo
@@ -145,9 +145,9 @@ if [[ -f "$INSTALL_DIR/dashboard.py" && -f "$INSTALL_DIR/venv/bin/activate" ]]; 
     sleep 3
     
     # Test if it's responding
-    if curl -s http://localhost:5000/health > /dev/null 2>&1; then
+    if curl -s http://localhost:80/health > /dev/null 2>&1; then
         print_success "Dashboard responds to HTTP requests!"
-        curl -s http://localhost:5000/health | python -m json.tool 2>/dev/null || echo "Health check response received"
+        curl -s http://localhost:80/health | python -m json.tool 2>/dev/null || echo "Health check response received"
     else
         print_warning "Dashboard not responding to HTTP requests"
     fi
@@ -222,15 +222,15 @@ if sudo systemctl is-active --quiet eero-dashboard; then
     
     # Test HTTP response
     sleep 2
-    if curl -s http://localhost:5000/health > /dev/null 2>&1; then
+    if curl -s http://localhost:80/health > /dev/null 2>&1; then
         print_success "🌐 Dashboard is responding to HTTP requests!"
         
         # Get IP address for remote access
         IP_ADDRESS=$(hostname -I | awk '{print $1}')
         echo
         echo "🚀 Dashboard Access URLs:"
-        echo "   Local:  http://localhost:5000"
-        echo "   Remote: http://$IP_ADDRESS:5000"
+        echo "   Local:  http://localhost"
+        echo "   Remote: http://$IP_ADDRESS"
         echo
         print_success "Dashboard is fully operational!"
     else

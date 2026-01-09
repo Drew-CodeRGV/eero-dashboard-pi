@@ -1581,7 +1581,7 @@ if __name__ == '__main__':
         
         app.run(
             host='0.0.0.0',  # Allow external connections
-            port=5000,
+            port=80,         # Standard HTTP port
             debug=False,     # Disable debug mode for production
             threaded=True,   # Enable threading for better performance
             use_reloader=False  # Disable reloader for systemd service
