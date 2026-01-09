@@ -183,6 +183,18 @@ Default port is 5000. To change:
 
 ## 🐛 Troubleshooting
 
+### **Quick Fix for Common Issues**
+If the dashboard service fails to start, run this quick fix script:
+```bash
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/quick-fix.sh | bash
+```
+
+### **Comprehensive Diagnostics**
+For detailed troubleshooting and diagnostics:
+```bash
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/diagnose-and-fix.sh | bash
+```
+
 ### **Common Issues**
 
 **Dashboard won't start:**
