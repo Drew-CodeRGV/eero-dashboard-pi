@@ -45,7 +45,7 @@ A professional network monitoring dashboard designed specifically for Raspberry 
 ### **Quick Install (Recommended)**
 ```bash
 # Download and run the installation script
-curl -sSL https://raw.githubusercontent.com/yourusername/eero-dashboard-pi/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/eero-drew/eero-dashboard-pi/main/install.sh | bash
 ```
 
 ### **Manual Installation**
@@ -216,9 +216,9 @@ sudo ufw status
 4. Consider Pi 4 for better performance
 
 ### **Getting Help**
-- **Issues**: [GitHub Issues](https://github.com/yourusername/eero-dashboard-pi/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/eero-dashboard-pi/discussions)
-- **Documentation**: [Wiki](https://github.com/yourusername/eero-dashboard-pi/wiki)
+- **Issues**: [GitHub Issues](https://github.com/eero-drew/eero-dashboard-pi/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/eero-drew/eero-dashboard-pi/discussions)
+- **Documentation**: [Wiki](https://github.com/eero-drew/eero-dashboard-pi/wiki)
 
 ## 🔄 Updates
 
@@ -244,7 +244,7 @@ Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidel
 ### **Development Setup**
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/eero-dashboard-pi.git
+git clone https://github.com/eero-drew/eero-dashboard-pi.git
 cd eero-dashboard-pi
 
 # Create virtual environment
@@ -271,9 +271,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 📞 Support
 
-- **Documentation**: [Wiki](https://github.com/yourusername/eero-dashboard-pi/wiki)
-- **Bug Reports**: [Issues](https://github.com/yourusername/eero-dashboard-pi/issues)
-- **Feature Requests**: [Discussions](https://github.com/yourusername/eero-dashboard-pi/discussions)
+- **Documentation**: [Wiki](https://github.com/eero-drew/eero-dashboard-pi/wiki)
+- **Bug Reports**: [Issues](https://github.com/eero-drew/eero-dashboard-pi/issues)
+- **Feature Requests**: [Discussions](https://github.com/eero-drew/eero-dashboard-pi/discussions)
 - **Email**: support@your-domain.com
 
 ---

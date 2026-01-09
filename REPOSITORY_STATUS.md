@@ -89,7 +89,7 @@ eero-dashboard-pi/
 ## 🎯 Ready for Deployment
 
 ### What Works Out of the Box
-1. **One-Command Installation**: `curl -sSL https://raw.githubusercontent.com/yourusername/eero-dashboard-pi/main/install.sh | bash`
+1. **One-Command Installation**: `curl -sSL https://raw.githubusercontent.com/eero-drew/eero-dashboard-pi/main/install.sh | bash`
 2. **Automatic Service Setup**: Systemd service with auto-start
 3. **Web Interface**: Accessible at `http://pi-ip:5000`
 4. **Multi-Network Support**: Add up to 6 networks via admin panel
