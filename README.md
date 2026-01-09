@@ -40,6 +40,36 @@ A professional network monitoring dashboard designed specifically for Raspberry 
 - Python 3.7+
 - Internet connection for Eero API access
 
+## 🔄 Migrating from Mac/Development Version
+
+### **Automatic Migration (Recommended)**
+If you have been running the dashboard on Mac/development machine:
+```bash
+# Run this on your Raspberry Pi
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/migrate-from-mac.sh | bash
+```
+
+This will automatically:
+- ✅ Connect to your Mac via SSH
+- ✅ Copy all configuration files
+- ✅ Transfer API tokens and authentication
+- ✅ Migrate historical data and logs
+- ✅ Restart the Pi service with your data
+
+### **Manual Export (Alternative)**
+If you prefer manual control:
+
+**On Mac:**
+```bash
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/export-mac-data.sh | bash
+```
+
+**On Pi:**
+```bash
+# Copy the exported files, then restart service
+sudo systemctl restart eero-dashboard
+```
+
 ## 🔧 Installation
 
 ### **Quick Install (Recommended)**
