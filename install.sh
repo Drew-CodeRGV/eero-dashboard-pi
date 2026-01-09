@@ -105,7 +105,7 @@ install_dashboard() {
     fi
     
     # Clone repository
-    git clone https://github.com/eero-drew/eero-dashboard-pi.git "$INSTALL_DIR"
+    git clone https://github.com/Drew-CodeRGV/eero-dashboard-pi.git "$INSTALL_DIR"
     cd "$INSTALL_DIR"
     
     # Create virtual environment
@@ -241,8 +241,8 @@ show_completion() {
     echo "   3. Add your Eero networks and authenticate"
     echo "   4. Enjoy monitoring your network!"
     echo
-    echo "📚 Documentation: https://github.com/eero-drew/eero-dashboard-pi"
-    echo "🐛 Issues: https://github.com/eero-drew/eero-dashboard-pi/issues"
+    echo "📚 Documentation: https://github.com/Drew-CodeRGV/eero-dashboard-pi"
+    echo "🐛 Issues: https://github.com/Drew-CodeRGV/eero-dashboard-pi/issues"
     echo
     echo "=================================================================="
 }

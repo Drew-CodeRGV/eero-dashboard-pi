@@ -4,12 +4,12 @@
 
 ### Option 1: Automated Installation (Recommended)
 ```bash
-curl -sSL https://raw.githubusercontent.com/eero-drew/eero-dashboard-pi/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/install.sh | bash
 ```
 
 ### Option 2: Manual Installation
 ```bash
-git clone https://github.com/eero-drew/eero-dashboard-pi.git
+git clone https://github.com/Drew-CodeRGV/eero-dashboard-pi.git
 cd eero-dashboard-pi
 chmod +x setup.sh
 ./setup.sh
@@ -51,10 +51,10 @@ sudo apt install -y htop nano vim
 ### Step 2: Download and Install
 ```bash
 # Method 1: Automated installer
-curl -sSL https://raw.githubusercontent.com/eero-drew/eero-dashboard-pi/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Drew-CodeRGV/eero-dashboard-pi/main/install.sh | bash
 
 # Method 2: Manual installation
-git clone https://github.com/eero-drew/eero-dashboard-pi.git
+git clone https://github.com/Drew-CodeRGV/eero-dashboard-pi.git
 cd eero-dashboard-pi
 ./setup.sh
 ```
