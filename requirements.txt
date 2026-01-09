@@ -1,0 +1,31 @@
+# Eero Dashboard for Raspberry Pi - Python Dependencies
+# Version: 7.0.14
+
+# Core web framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# HTTP requests for Eero API
+requests==2.31.0
+
+# Timezone handling
+pytz==2023.3
+
+# Path handling (built-in but explicit for clarity)
+pathlib2==2.3.7; python_version < '3.4'
+
+# Additional utilities
+Werkzeug==2.3.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+itsdangerous==2.1.2
+click==8.1.7
+
+# For better JSON handling
+simplejson==3.19.1
+
+# Logging enhancements
+colorlog==6.7.0
+
+# System monitoring (optional)
+psutil==5.9.5

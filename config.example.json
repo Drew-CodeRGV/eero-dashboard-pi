@@ -1,0 +1,25 @@
+{
+  "networks": [
+    {
+      "id": "12345678",
+      "name": "Home Network",
+      "email": "your-email@example.com",
+      "token": "",
+      "active": true
+    },
+    {
+      "id": "87654321", 
+      "name": "Office Network",
+      "email": "office-email@example.com",
+      "token": "",
+      "active": true
+    }
+  ],
+  "environment": "production",
+  "api_url": "api-user.e2ro.com",
+  "timezone": "America/New_York",
+  "kiosk_settings": {
+    "dashboard_time": 5000,
+    "capacity_time": 7000
+  }
+}

@@ -1,0 +1,4381 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <title>Network Dashboard v7.0.10 (Improved Spacing) - Updated</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Typography: Centra No. 2 for text, Roboto for numbers -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Modern Design System - Eero Insight Inspired */
+        :root {
+            /* Typography */
+            --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            --font-numbers: 'Roboto', 'SF Mono', 'Monaco', monospace;
+            
+            /* Color System - Professional & Accessible */
+            --color-background: #f8fafc;
+            --color-surface: #ffffff;
+            --color-surface-secondary: #f1f5f9;
+            --color-surface-tertiary: #e2e8f0;
+            
+            /* Text Colors */
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-tertiary: #64748b;
+            --color-text-muted: #94a3b8;
+            
+            /* Brand Colors - Eero Theme */
+            --color-primary: #1e3a8a; /* Midnight blue - Eero primary */
+            --color-primary-hover: #1e40af; /* Darker midnight blue */
+            --color-success: #10b981; /* Eero green */
+            --color-success-hover: #059669; /* Darker green */
+            --color-warning: #f59e0b; /* Eero amber/yellow */
+            --color-error: #ef4444; /* Eero red accent */
+            
+            /* Header - Eero Midnight Blue Theme */
+            --color-header-bg: #0f172a; /* Deep midnight blue */
+            --color-header-text: #ffffff;
+            --color-header-text-muted: #cbd5e1;
+            
+            /* Spacing System (8pt grid) */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+            --space-12: 48px;
+            
+            /* Typography Scale */
+            --text-xs: 11px;
+            --text-sm: 12px;
+            --text-base: 14px;
+            --text-lg: 16px;
+            --text-xl: 18px;
+            --text-2xl: 20px;
+            --text-3xl: 24px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-base: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        
+        /* Reset and Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Disable animations globally */
+        *, *::before, *::after {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+        }
+        
+        /* Base Typography */
+        body {
+            font-family: var(--font-text);
+            font-size: var(--text-base);
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Apply Roboto to all numeric content */
+        .numeric, .number, .count, .percentage, .ratio, .metric, .data,
+        .chart-value, .device-count, .signal-value, .frequency-value,
+        .ap-total, .network-stat-value, .frequency-count, .version,
+        .network-ap-id, .device-value, .freq-segment, .time-value,
+        input[type="number"], [data-numeric="true"] {
+            font-family: var(--font-numbers) !important;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* DESIGN SYSTEM OVERRIDES - Fix all white text issues */
+        
+        /* Header Elements */
+        .header-title { 
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+            min-width: 0;
+            flex: 1;
+        }
+        
+        .network-name {
+            font-size: var(--text-2xl);
+            font-weight: 600; 
+            color: var(--color-header-text) !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        
+        .header-subtitle {
+            font-size: var(--text-sm);
+            color: var(--color-header-text-muted) !important;
+            font-weight: 400;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        
+        .version {
+            color: var(--color-primary) !important;
+            font-weight: 500;
+            font-family: var(--font-numbers) !important;
+        }
+        
+        .email {
+            color: var(--color-header-text-muted) !important;
+        }
+        
+        /* Button Styles */
+        .csv-export-btn {
+            background: var(--color-success) !important;
+            border: none;
+            border-radius: var(--radius-base);
+            color: var(--color-header-text) !important;
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-base);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .csv-export-btn:hover {
+            background: var(--color-success-hover) !important;
+        }
+        
+        .header-btn { 
+            padding: var(--space-2) var(--space-4);
+            background: var(--color-primary) !important;
+            border: none; 
+            border-radius: var(--radius-base);
+            color: var(--color-header-text) !important;
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: var(--space-2);
+            font-size: var(--text-base);
+            white-space: nowrap;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .header-btn:hover { 
+            background: var(--color-primary-hover) !important;
+        }
+        
+        /* Kiosk mode button styling */
+        #kioskModeBtn {
+            transition: all 0.3s ease;
+        }
+        
+        #kioskModeBtn.active {
+            background: var(--color-success) !important;
+            border-color: var(--color-success) !important;
+            animation: pulse-kiosk 2s infinite;
+        }
+        
+        @keyframes pulse-kiosk {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+        }
+        
+        .time-range-selector select {
+            background: var(--color-warning) !important; /* Eero amber/yellow */
+            border: 1px solid #d97706; /* Darker amber border */
+            border-radius: var(--radius-base);
+            color: #1a202c !important; /* Dark text for contrast */
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-base);
+            cursor: pointer;
+            min-width: 120px;
+            line-height: 1.4;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+        
+        .time-range-selector select:hover {
+            background: #fbbf24 !important; /* Lighter amber on hover */
+            border-color: #b45309; /* Darker border on hover */
+            box-shadow: var(--shadow-base);
+        }
+        
+        .time-range-selector select:focus {
+            outline: none;
+            border-color: var(--color-primary); /* Eero midnight blue focus */
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); /* Blue focus ring */
+            background: #fcd34d !important; /* Bright amber when focused */
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-page {
+            display: none;
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: var(--color-background) !important;
+        }
+        
+        .dashboard-container { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: 1fr;
+            gap: var(--space-4);
+            padding: var(--space-6);
+            flex: 1; 
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+        
+        /* Chart Cards */
+        .chart-card { 
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-base);
+            border: 1px solid var(--color-surface-tertiary);
+            display: flex; 
+            flex-direction: column;
+            box-sizing: border-box;
+            min-height: 0; 
+            overflow: hidden; 
+        }
+        
+        .chart-title { 
+            font-size: var(--text-lg);
+            font-weight: 600; 
+            margin-bottom: var(--space-2);
+            text-align: center; 
+            color: var(--color-text-primary) !important;
+            text-transform: uppercase; 
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+        
+        .chart-subtitle { 
+            font-size: var(--text-base);
+            text-align: center; 
+            color: var(--color-text-secondary) !important;
+            margin-bottom: var(--space-4);
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+        
+        /* AP Page Styles */
+        .ap-page-header {
+            text-align: center;
+            margin: var(--space-6);
+            padding: var(--space-6);
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-surface-tertiary);
+            box-shadow: var(--shadow-base);
+        }
+        
+        .ap-page-title {
+            font-size: var(--text-3xl);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            margin-bottom: var(--space-2);
+            line-height: 1.3;
+        }
+        
+        .ap-page-subtitle {
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary) !important;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .ap-content-container {
+            margin: var(--space-8); /* Increased margin for better breathing room */
+            min-height: calc(100vh - 200px);
+            overflow-y: auto;
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-md);
+            padding: var(--space-8); /* Increased padding for better spacing */
+            box-shadow: var(--shadow-base);
+            border: 1px solid var(--color-surface-tertiary);
+        }
+        
+        /* AP Visualization */
+        .ap-visualization-container {
+            background: var(--color-surface) !important;
+            margin: 0;
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            border: 1px solid var(--color-surface-tertiary);
+            min-height: 100px;
+            display: block !important;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .ap-viz-title {
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            text-align: center;
+            margin-bottom: var(--space-6);
+            display: block !important;
+            line-height: 1.3;
+        }
+        
+        .network-ap-section {
+            margin-bottom: var(--space-8); /* Increased margin for better separation */
+            background: var(--color-surface-secondary) !important;
+            border-radius: var(--radius-md);
+            padding: var(--space-6); /* Increased padding for better spacing */
+            border: 1px solid var(--color-surface-tertiary);
+            display: flex;
+            gap: var(--space-6); /* Increased gap between elements */
+            align-items: flex-start;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .network-ap-header {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            margin-bottom: var(--space-3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 1.3;
+        }
+        
+        .network-ap-id {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary) !important;
+            font-weight: 400;
+            font-family: var(--font-numbers) !important;
+            line-height: 1.4;
+        }
+        
+        .network-ap-chart {
+            width: 200px;
+            height: 200px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-md);
+            padding: var(--space-6); /* Increased padding for better spacing */
+            border: 1px solid var(--color-surface-tertiary);
+            box-shadow: var(--shadow-sm);
+            margin: var(--space-2); /* Add margin for breathing room */
+        }
+        
+        .network-ap-chart-title {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary) !important;
+            text-align: center;
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        
+        /* AP Items */
+        .ap-item {
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-base);
+            padding: var(--space-3);
+            border: 1px solid var(--color-surface-tertiary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .ap-name {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            margin-bottom: var(--space-1);
+            line-height: 1.3;
+        }
+        
+        .ap-model {
+            font-size: var(--text-xs);
+            color: var(--color-text-secondary) !important;
+            margin-bottom: var(--space-2);
+            line-height: 1.4;
+        }
+        
+        .ap-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--text-xs);
+            color: var(--color-text-secondary) !important;
+            font-family: var(--font-numbers) !important;
+            line-height: 1.4;
+        }
+        
+        .ap-total {
+            font-weight: 600;
+            color: var(--color-primary) !important;
+            font-family: var(--font-numbers) !important;
+        }
+        
+        /* Frequency Bars */
+        .frequency-bar-container {
+            background: var(--color-surface-tertiary) !important;
+            border-radius: 3px;
+            height: 16px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--space-2);
+        }
+        
+        .freq-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            font-family: var(--font-numbers) !important;
+            line-height: 1;
+        }
+        
+        /* Light frequency colors for dark text */
+        .freq-24ghz {
+            background: linear-gradient(135deg, #fecaca, #fca5a5) !important;
+        }
+        
+        .freq-5ghz {
+            background: linear-gradient(135deg, #bbf7d0, #86efac) !important;
+        }
+        
+        .freq-6ghz {
+            background: linear-gradient(135deg, #bfdbfe, #93c5fd) !important;
+        }
+        
+        /* Network Information */
+        .network-stats {
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-md);
+            padding: var(--space-8); /* Increased padding for better spacing */
+            margin: var(--space-8); /* Increased margin for breathing room */
+            border: 1px solid var(--color-surface-tertiary);
+            box-shadow: var(--shadow-base);
+            position: relative;
+            width: calc(100% - 64px); /* Adjusted for increased margins */
+        }
+        
+        .network-stats-title {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            margin-bottom: var(--space-4);
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        .network-info-item {
+            background: var(--color-surface) !important;
+            border-radius: var(--radius-base);
+            padding: var(--space-6); /* Increased padding for better spacing */
+            margin-bottom: var(--space-6); /* Increased margin for breathing room */
+            border-left: 4px solid var(--color-primary);
+            border: 1px solid var(--color-surface-tertiary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .network-name-info {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-text-primary) !important;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex: 1;
+        }
+        
+        .network-name-display {
+            flex: 1;
+        }
+        
+        .network-rename-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: var(--space-1);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-sm);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+        
+        .network-rename-btn:hover {
+            color: var(--color-primary);
+            background: var(--color-surface-secondary);
+            opacity: 1;
+        }
+        
+        .network-rename-form {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex: 1;
+        }
+        
+        .network-rename-input {
+            flex: 1;
+            padding: var(--space-2);
+            border: 1px solid var(--color-surface-tertiary);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            background: var(--color-surface);
+        }
+        
+        .network-rename-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+        }
+        
+        .network-rename-save,
+        .network-rename-cancel {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-sm);
+            transition: all 0.2s ease;
+        }
+        
+        .network-rename-save {
+            color: var(--color-success);
+        }
+        
+        .network-rename-save:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .network-rename-cancel {
+            color: var(--color-error);
+        }
+        
+        .network-rename-cancel:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .network-status.authenticated {
+            background: #f0fdf4 !important;
+            color: #166534 !important;
+            border: 1px solid var(--color-success) !important;
+        }
+        
+        .network-status.not-authenticated {
+            background: #fef2f2 !important;
+            color: #991b1b !important;
+            border: 1px solid var(--color-error) !important;
+        }
+        
+        .network-detail-label {
+            color: var(--color-text-secondary) !important;
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .network-detail-value {
+            color: var(--color-text-primary) !important;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .network-id-link {
+            color: var(--color-primary) !important;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted var(--color-primary);
+        }
+        
+        .network-id-link:hover {
+            color: var(--color-primary-hover) !important;
+            border-bottom-color: var(--color-primary-hover);
+        }
+        
+        .device-type-badge {
+            background: #eff6ff !important;
+            color: #1e40af !important;
+            padding: var(--space-1) var(--space-2);
+            border-radius: 12px;
+            font-size: var(--text-xs);
+            border: 1px solid #bfdbfe;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 767px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                gap: var(--space-4);
+                padding: var(--space-4);
+            }
+            
+            .ap-content-container {
+                margin: var(--space-4);
+                padding: var(--space-4);
+            }
+            
+            .network-ap-section {
+                flex-direction: column;
+                gap: var(--space-4);
+            }
+            
+            .network-ap-chart {
+                width: 150px;
+                height: 150px;
+                align-self: center;
+            }
+        }
+        
+        /* COMPREHENSIVE WHITE TEXT ELIMINATION - ULTIMATE SOLUTION */
+        
+        /* Step 1: Force ALL elements to use dark text by default */
+        *, *::before, *::after,
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed, 
+        figure, figcaption, footer, header, hgroup, 
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video, input, textarea, select, option,
+        button {
+            color: #1a202c !important; /* Darkest possible text */
+        }
+        
+        /* Step 2: Specific overrides for elements that SHOULD have white text on dark backgrounds */
+        .header, .header *,
+        .header-title, .header-title *,
+        .network-name, .header-subtitle,
+        .version, .email,
+        .pi-icon, .pi-icon *,
+        .csv-export-btn, .csv-export-btn *,
+        .header-btn, .header-btn *,
+        .time-range-selector select,
+        .status-indicator, .status-indicator *,
+        .status-dot {
+            color: #ffffff !important; /* White text for dark backgrounds */
+        }
+        
+        /* Step 3: Form buttons and interactive elements on dark backgrounds */
+        .form-btn, .form-btn *,
+        .admin-btn, .admin-btn *,
+        .modal-close, .modal-close * {
+            color: #ffffff !important;
+        }
+        
+        /* Step 4: Modal content - special handling */
+        .modal-content {
+            background: #ffffff !important; /* White background for modal */
+            color: #1a202c !important; /* Dark text */
+        }
+        
+        .modal-content *, 
+        .modal-content h1, .modal-content h2, .modal-content h3,
+        .modal-content p, .modal-content div, .modal-content span,
+        .modal-content label, .modal-content input, .modal-content button:not(.modal-close):not(.form-btn):not(.admin-btn) {
+            color: #1a202c !important; /* Force dark text in modal */
+            background-color: transparent !important;
+        }
+        
+        /* Step 5: Form inputs should have dark text on light backgrounds */
+        .form-input, .form-input *,
+        input[type="text"], input[type="email"], input[type="password"], 
+        input[type="number"], textarea, select {
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+        }
+        
+        /* Step 6: Device grid and admin info - force light backgrounds with dark text */
+        .device-grid, .device-grid *,
+        .device-item, .device-item *,
+        .device-name, .device-info, .device-info *,
+        .device-label, .device-value,
+        .admin-info, .admin-info *,
+        .admin-info-item, .admin-info-item * {
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+        }
+        
+        /* Step 7: Chart and dashboard elements */
+        .chart-card, .chart-card *,
+        .chart-title, .chart-subtitle,
+        .network-stats, .network-stats *,
+        .network-info-item, .network-info-item *,
+        .network-name-info, .network-detail-label, .network-detail-value {
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+        }
+        
+        /* Step 8: AP visualization elements */
+        .ap-content-container, .ap-content-container *,
+        .ap-visualization-container, .ap-visualization-container *,
+        .ap-viz-title, .network-ap-section, .network-ap-section *,
+        .network-ap-header, .network-ap-id,
+        .ap-list, .ap-list *,
+        .ap-item, .ap-item *,
+        .ap-name, .ap-model, .ap-stats, .ap-stats *,
+        .network-ap-chart-title {
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+        }
+        
+        /* Step 9: Links should be blue but still readable */
+        a, a *,
+        .network-id-link, .network-id-link * {
+            color: #3182ce !important; /* Accessible blue */
+        }
+        
+        /* Step 10: Status badges and indicators */
+        .network-status.authenticated, .network-status.authenticated * {
+            background: #f0fff4 !important;
+            color: #22543d !important; /* Dark green */
+        }
+        
+        .network-status.not-authenticated, .network-status.not-authenticated * {
+            background: #fed7d7 !important;
+            color: #742a2a !important; /* Dark red */
+        }
+        
+        .device-type-badge, .device-type-badge * {
+            background: #ebf8ff !important;
+            color: #2c5282 !important; /* Dark blue */
+        }
+        
+        /* Step 11: Alert messages */
+        .alert-success, .alert-success * {
+            color: #22543d !important; /* Dark green */
+        }
+        
+        .alert-error, .alert-error * {
+            color: #742a2a !important; /* Dark red */
+        }
+        
+        .alert-info, .alert-info * {
+            color: #2c5282 !important; /* Dark blue */
+        }
+        
+        /* Step 12: Frequency segments with dark text */
+        .freq-segment, .freq-segment * {
+            color: #1a202c !important; /* Dark text on light frequency colors */
+        }
+        
+        /* Step 13: Ensure all backgrounds are light for readability */
+        body, .dashboard-page {
+            background-color: #f8fafc !important; /* Light gray background */
+        }
+        
+        .chart-card, .network-stats, .ap-content-container,
+        .ap-visualization-container, .network-info-item,
+        .ap-item, .device-item, .modal-content {
+            background-color: #ffffff !important; /* White backgrounds */
+        }
+        
+        .network-ap-section, .ap-page-header {
+            background-color: #f7fafc !important; /* Subtle light background */
+        }
+        
+        /* Step 14: Override any remaining white text from legacy CSS */
+        .device-label, .device-value,
+        .network-stat-label, .network-stat-value,
+        .frequency-label, .frequency-count,
+        .network-header *, .network-details *,
+        .frequency-breakdown *, .frequency-item * {
+            color: #1a202c !important;
+        }
+        
+        /* Step 15: Final catch-all for any missed elements */
+        [style*="color: white"], [style*="color: #fff"], [style*="color: #ffffff"],
+        [style*="color: rgba(255,255,255"], [style*="color: rgb(255,255,255"] {
+            color: #1a202c !important;
+        }
+        
+        /* Step 16: Chart.js and JavaScript content overrides */
+        canvas, .chartjs-tooltip, .chartjs-tooltip *,
+        [data-chart], [data-chart] *,
+        .chart-container canvas, .chart-container .chartjs-render-monitor {
+            color: #1a202c !important;
+        }
+        
+        .chartjs-tooltip {
+            background-color: #ffffff !important;
+        }
+        
+        /* Step 17: Override any inline styles that might set white text */
+        [style*="color:#fff"], [style*="color:#ffffff"], [style*="color:white"],
+        [style*="color: #fff"], [style*="color: #ffffff"], [style*="color: white"],
+        [style*="color:rgb(255,255,255)"], [style*="color: rgb(255,255,255)"],
+        [style*="color:rgba(255,255,255"], [style*="color: rgba(255,255,255"] {
+            color: #1a202c !important;
+        }
+        
+        /* Step 18: Specific component overrides */
+        .admin-info-item span, .device-info-item span,
+        .network-stat span, .frequency-item span {
+            color: #1a202c !important;
+        }
+    </style>
+    <style>
+        /* Reset and base styles with improved contrast */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+        }
+        
+        /* Prevent all animations and transitions globally */
+        *, *::before, *::after {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+        }
+
+        
+        /* Professional header with design system */
+        .header { 
+            background: var(--color-header-bg);
+            padding: var(--space-4) var(--space-6);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--color-surface-tertiary);
+            flex-wrap: wrap;
+            gap: var(--space-4);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            height: 72px;
+            box-sizing: border-box;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header-title { 
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+            flex: 1;
+        }
+        
+        .network-name {
+            font-size: 20px; /* Clear hierarchy */
+            font-weight: 600; 
+            color: #ffffff; /* Perfect contrast: 21:1 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        
+        .header-subtitle {
+            font-size: 13px; /* Smaller but readable */
+            color: #cbd5e0; /* Good contrast: 8.59:1 */
+            font-weight: 400;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        
+        .version {
+            color: #63b3ed; /* Accessible blue: 5.74:1 */
+            font-weight: 500;
+        }
+        
+        .email {
+            color: #a0aec0; /* Muted but readable: 6.66:1 */
+        }
+        
+        .header-actions { 
+            display: flex; 
+            gap: 6px; 
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .csv-export-btn {
+            background: #38a169; /* Accessible green: 4.52:1 on white */
+            border: none;
+            border-radius: 6px;
+            color: #ffffff; /* Perfect contrast: 21:1 */
+            padding: 10px 16px; /* 8pt grid */
+            font-size: 14px; /* Consistent sizing */
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* 8pt grid */
+            transition: all 0.2s ease;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .csv-export-btn:hover {
+            background: #2f855a; /* Darker on hover */
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+        }
+        
+        .time-range-selector select {
+            background: #2d3748; /* Dark with good contrast */
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            color: #ffffff; /* Perfect contrast */
+            padding: 10px 16px; /* 8pt grid */
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 120px; /* 8pt grid */
+            line-height: 1.4;
+        }
+        
+        .time-range-selector select:focus {
+            outline: none;
+            border-color: #4299e1; /* Accessible blue focus */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .header-btn { 
+            padding: 10px 16px; /* 8pt grid */
+            background: #4299e1; /* Accessible blue: 4.52:1 */
+            border: none; 
+            border-radius: 6px; 
+            color: #ffffff; /* Perfect contrast */
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; /* 8pt grid */
+            font-size: 14px; 
+            transition: all .2s;
+            white-space: nowrap;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .header-btn:hover { 
+            background: #3182ce; /* Darker on hover */
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+        
+        .status-indicator { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            padding: 6px 12px; 
+            background: rgba(0,0,0,.2); 
+            border-radius: 20px; 
+            font-size: clamp(10px, 2vw, 12px);
+            white-space: nowrap;
+            color: #bdc3c7;
+        }
+        
+        .status-dot { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            background: #27ae60; 
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: .5; } 
+        }
+        
+        /* Mobile-optimized π button */
+        .pi-icon { 
+            position: fixed; 
+            bottom: 15px; 
+            right: 15px; 
+            width: clamp(35px, 8vw, 45px); 
+            height: clamp(35px, 8vw, 45px); 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            box-shadow: 0 4px 20px rgba(102,126,234,.4); 
+            transition: all .3s; 
+            z-index: 999; 
+            font-size: clamp(16px, 4vw, 20px); 
+            font-weight: 700; 
+            color: #fff; 
+            border: 2px solid rgba(255,255,255,.3);
+            touch-action: manipulation;
+        }
+        
+        .pi-icon:hover, .pi-icon:active { 
+            transform: scale(1.1) rotate(180deg); 
+        }
+        
+        /* Simple page switching - FIXED */
+        .dashboard-page {
+            display: none;
+            position: fixed;
+            top: 72px; /* Updated for new header height */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: #f5f7fa; /* Consistent background */
+        }
+        
+        .dashboard-page.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ap-page-header {
+            text-align: center;
+            margin: 24px; /* 8pt grid */
+            padding: 24px; /* 8pt grid */
+            background: #ffffff;
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        }
+        
+        .ap-page-title {
+            font-size: 24px; /* Clear hierarchy */
+            font-weight: 600;
+            color: #1a202c; /* High contrast: 16.75:1 */
+            margin-bottom: 8px; /* 8pt grid */
+            line-height: 1.3;
+        }
+        
+        .ap-page-subtitle {
+            font-size: 16px; /* Readable size */
+            color: #4a5568; /* Good contrast: 7.73:1 */
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .ap-content-container {
+            margin: 24px; /* 8pt grid */
+            min-height: calc(100vh - 200px);
+            overflow-y: auto;
+            background: #ffffff; /* White background for better contrast */
+            border-radius: 8px;
+            padding: 24px; /* 8pt grid */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Responsive dashboard grid with 8pt spacing system */
+        .dashboard-container { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+            grid-template-rows: 1fr; /* Single row */
+            gap: 16px; /* 8pt grid: 16px */
+            padding: 24px; /* 8pt grid: 24px */
+            flex: 1; 
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+        
+        /* Mobile - stack vertically with proper spacing */
+        @media (max-width: 767px) {
+            .dashboard-container {
+                grid-template-columns: 1fr; /* Single column on mobile */
+                grid-template-rows: repeat(4, 1fr); /* 4 rows */
+                gap: 16px; /* Consistent spacing */
+                padding: 16px; /* Smaller padding on mobile */
+            }
+        }
+        
+        .ap-chart-container {
+            height: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        /* Modern chart cards with proper spacing and contrast */
+        .chart-card { 
+            background: #ffffff; 
+            border-radius: 8px; 
+            padding: 24px; /* 8pt grid: 24px */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); /* Layered shadows */
+            border: 1px solid #e2e8f0; 
+            display: flex; 
+            flex-direction: column;
+            box-sizing: border-box;
+            min-height: 0; 
+            overflow: hidden; 
+        }
+        
+        .chart-title { 
+            font-size: 16px; /* Clear hierarchy */
+            font-weight: 600; 
+            margin-bottom: 8px; /* 8pt grid */
+            text-align: center; 
+            color: #1a202c; /* High contrast: 16.75:1 */
+            text-transform: uppercase; 
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+        
+        .chart-subtitle { 
+            font-size: 14px; /* Readable size */
+            text-align: center; 
+            color: #4a5568; /* Good contrast: 7.73:1 */
+            margin-bottom: 16px; /* 8pt grid */
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+        
+        .chart-container { 
+            flex: 1; /* Take all remaining space */
+            position: relative; 
+            min-height: 0; /* Allow flex shrinking */
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        canvas { 
+            max-width: 100% !important; 
+            max-height: 100% !important; 
+            width: auto !important; 
+            height: auto !important; 
+            position: static !important;
+        }
+        
+        /* Completely disable all animations and transitions */
+        .chart-container *, 
+        .chart-container canvas,
+        .chart-card *,
+        .dashboard-container *,
+        body * {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+        }
+        
+        /* Network statistics with improved contrast and spacing */
+        .network-stats {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 24px; /* 8pt grid */
+            margin: 24px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            position: relative;
+            width: calc(100% - 48px); /* Account for margins */
+        }
+        
+        .network-stats-title {
+            font-size: 18px; /* Clear hierarchy */
+            font-weight: 600;
+            color: #1a202c; /* High contrast: 16.75:1 */
+            margin-bottom: 16px; /* 8pt grid */
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        .network-item {
+            background: #f7fafc; /* Subtle background */
+            border-radius: 6px;
+            padding: 16px; /* 8pt grid */
+            margin-bottom: 16px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .network-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Network info container styles for static display */
+        .network-info-container {
+            height: calc(100% - 60px); /* Fill remaining space after title and subtitle */
+            min-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .network-info-item {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 16px; /* 8pt grid */
+            margin-bottom: 16px; /* 8pt grid */
+            border-left: 4px solid #4299e1; /* Accessible blue */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .network-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .network-name-info {
+            font-size: 16px; /* Clear hierarchy */
+            font-weight: 600;
+            color: #1a202c; /* High contrast: 16.75:1 */
+            line-height: 1.3;
+        }
+        
+        .network-status {
+            font-size: clamp(10px, 2.5vw, 12px);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .network-status.authenticated {
+            background: #f0fff4; /* Light green background */
+            color: #22543d; /* Dark green text: 8.59:1 contrast */
+            border: 1px solid #38a169;
+        }
+        
+        .network-status.not-authenticated {
+            background: #fed7d7; /* Light red background */
+            color: #742a2a; /* Dark red text: 8.59:1 contrast */
+            border: 1px solid #e53e3e;
+        }
+        
+        .network-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            font-size: clamp(10px, 2.5vw, 12px);
+        }
+        
+        .network-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .network-detail-label {
+            color: #4a5568; /* Good contrast: 7.73:1 */
+            font-size: 11px; /* Consistent sizing */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .network-detail-value {
+            color: #1a202c; /* High contrast: 16.75:1 */
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .network-id-link {
+            color: #3182ce; /* Accessible blue: 4.52:1 */
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted #3182ce;
+        }
+        
+        .network-id-link:hover {
+            color: #2c5282; /* Darker on hover */
+            border-bottom-color: #2c5282;
+        }
+        
+        .device-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        
+        .device-type-badge {
+            background: #ebf8ff; /* Light blue background */
+            color: #2c5282; /* Dark blue text: 7.73:1 contrast */
+            padding: 4px 8px; /* 8pt grid */
+            border-radius: 12px;
+            font-size: 11px; /* Consistent sizing */
+            border: 1px solid #bee3f8;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        /* AP Visualization Styles with white background */
+        .ap-visualization-container {
+            background: #ffffff; /* White background for better contrast */
+            margin: 0; /* Remove margin since parent has padding */
+            border-radius: 8px;
+            padding: 24px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            min-height: 100px;
+            display: block !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .ap-viz-title {
+            font-size: 20px; /* Clear hierarchy with Centra No. 2 */
+            font-weight: 600;
+            color: #1a202c; /* High contrast */
+            text-align: center;
+            margin-bottom: 24px; /* 8pt grid */
+            display: block !important;
+            line-height: 1.3;
+        }
+        
+        .network-ap-section {
+            margin-bottom: 24px; /* 8pt grid */
+            background: #f7fafc; /* Subtle background on white */
+            border-radius: 8px;
+            padding: 16px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            display: flex;
+            gap: 16px; /* 8pt grid */
+            align-items: flex-start;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .network-ap-content {
+            flex: 1; /* Take remaining space */
+            min-width: 0; /* Allow shrinking */
+        }
+        
+        .network-ap-chart {
+            width: 200px;
+            height: 200px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff; /* White background for chart */
+            border-radius: 8px;
+            padding: 16px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .network-ap-chart canvas {
+            max-width: 180px !important;
+            max-height: 180px !important;
+        }
+        
+        .network-ap-chart-title {
+            font-size: 12px;
+            color: #4a5568; /* Good contrast on white */
+            text-align: center;
+            margin-bottom: 8px; /* 8pt grid */
+            font-weight: 500;
+            font-family: var(--font-text) !important; /* Centra No. 2 for titles */
+            line-height: 1.3;
+        }
+        
+        .network-ap-header {
+            font-size: 16px; /* Clear hierarchy with Centra No. 2 */
+            font-weight: 600;
+            color: #1a202c; /* High contrast */
+            margin-bottom: 12px; /* 8pt grid */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 1.3;
+            font-family: var(--font-text) !important;
+        }
+        
+        .network-ap-id {
+            font-size: 12px; /* Roboto for network IDs */
+            color: #4a5568; /* Good contrast */
+            font-weight: 400;
+            font-family: var(--font-numbers) !important;
+            line-height: 1.4;
+        }
+        
+        .ap-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        
+        .ap-item {
+            background: #ffffff; /* White background for AP items */
+            border-radius: 6px;
+            padding: 12px; /* 8pt grid */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .ap-name {
+            font-size: 14px; /* Centra No. 2 for AP names */
+            font-weight: 600;
+            color: #1a202c; /* High contrast */
+            margin-bottom: 4px; /* 8pt grid */
+            line-height: 1.3;
+            font-family: var(--font-text) !important;
+        }
+        
+        .ap-model {
+            font-size: 11px; /* Smaller text */
+            color: #4a5568; /* Good contrast */
+            margin-bottom: 8px; /* 8pt grid */
+            line-height: 1.4;
+            font-family: var(--font-text) !important;
+        }
+        
+        .frequency-bar-container {
+            background: #e2e8f0; /* Better contrast on white */
+            border-radius: 3px;
+            height: 16px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px; /* 8pt grid */
+        }
+        
+        .frequency-bar {
+            height: 100%;
+            display: flex;
+            border-radius: 3px;
+        }
+        
+        .freq-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #1a202c; /* Dark text for better contrast */
+            font-family: var(--font-numbers) !important;
+            line-height: 1;
+            text-shadow: none; /* Remove text shadow */
+        }
+        
+        .freq-24ghz {
+            background: linear-gradient(135deg, #fed7d7, #fbb6ce); /* Light red/pink */
+        }
+        
+        .freq-5ghz {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4); /* Light green */
+        }
+        
+        .freq-6ghz {
+            background: linear-gradient(135deg, #bee3f8, #90cdf4); /* Light blue */
+        }
+        
+        .ap-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px; /* Roboto for stats */
+            color: #4a5568; /* Good contrast */
+            font-family: var(--font-numbers) !important;
+            line-height: 1.4;
+        }
+        
+        .ap-total {
+            font-weight: 600;
+            color: #3182ce; /* Accessible blue */
+            font-family: var(--font-numbers) !important;
+        }
+        
+        /* Mobile optimizations for AP visualization */
+        @media (max-width: 768px) {
+            .ap-content-container {
+                margin: 16px; /* 8pt grid */
+                padding: 16px; /* 8pt grid */
+            }
+            
+            .ap-visualization-container {
+                margin: 0;
+                padding: 16px; /* 8pt grid */
+            }
+            
+            .ap-list {
+                grid-template-columns: 1fr;
+                gap: 12px; /* 8pt grid */
+            }
+            
+            .network-ap-section {
+                padding: 16px; /* 8pt grid */
+                margin-bottom: 24px; /* 8pt grid */
+                flex-direction: column;
+                gap: 16px; /* 8pt grid */
+            }
+            
+            .network-ap-chart {
+                width: 150px;
+                height: 150px;
+                align-self: center;
+            }
+            
+            .network-ap-chart canvas {
+                max-width: 130px !important;
+                max-height: 130px !important;
+            }
+        }
+        
+        .network-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 5px;
+            height: 24px;
+            font-family: var(--font-text) !important;
+        }
+        
+        .network-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c; /* High contrast */
+            font-family: var(--font-text) !important;
+            line-height: 1.3;
+        }
+        
+        .network-id {
+            font-size: 11px;
+            color: #4a5568; /* Good contrast */
+            font-family: var(--font-numbers) !important;
+        }
+        
+        .network-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            font-size: 11px;
+            font-family: var(--font-text) !important;
+        }
+        
+        .network-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            height: 16px;
+            align-items: center;
+        }
+        
+        .network-stat-label {
+            color: #4a5568; /* Good contrast */
+            font-family: var(--font-text) !important;
+        }
+        
+        .network-stat-value {
+            color: #1a202c; /* High contrast */
+            font-weight: 500;
+            font-family: var(--font-numbers) !important;
+        }
+        
+        .frequency-breakdown {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0; /* Better contrast */
+        }
+        
+        .frequency-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1px 0;
+            font-size: 10px;
+            height: 14px;
+            align-items: center;
+        }
+        
+        .frequency-label {
+            color: #4a5568; /* Good contrast */
+            font-family: var(--font-text) !important;
+        }
+        
+        .frequency-count {
+            color: #3182ce; /* Accessible blue */
+            font-weight: 500;
+            font-family: var(--font-numbers) !important;
+        }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,.8); 
+            overflow: auto;
+            padding: 10px;
+        }
+        
+        .modal.active { 
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: center;
+            padding-top: 20px;
+        }
+        
+        .modal-content { 
+            background: linear-gradient(135deg, #001a33 0%, #003366 100%); 
+            border-radius: 15px; 
+            padding: 20px; 
+            max-width: 95vw; 
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh; 
+            overflow-y: auto; 
+            box-shadow: 0 10px 50px rgba(0,0,0,.5); 
+            border: 2px solid rgba(77,166,255,.3); 
+            position: relative;
+            margin: auto;
+        }
+        
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px; 
+            border-bottom: 2px solid rgba(77,166,255,.3);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .modal-title { 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: #1a202c; /* High contrast */
+            flex: 1;
+            min-width: 0;
+            font-family: var(--font-text) !important;
+            line-height: 1.3;
+        }
+        
+        .modal-close { 
+            font-size: clamp(24px, 6vw, 28px); 
+            cursor: pointer; 
+            color: #fff; 
+            background: none; 
+            border: none; 
+            transition: all .3s;
+            padding: 5px;
+            touch-action: manipulation;
+        }
+        
+        .modal-close:hover, .modal-close:active { 
+            color: #ff6b6b; 
+            transform: rotate(90deg); 
+        }
+        
+        /* Mobile-optimized device grid */
+        .device-grid { 
+            display: grid; 
+            gap: 12px; 
+            margin-top: 15px; 
+        }
+        
+        .device-item { 
+            background: rgba(0,40,80,.5); 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid rgba(77,166,255,.2); 
+            transition: all .3s; 
+        }
+        
+        .device-item:hover, .device-item:active { 
+            border-color: #4da6ff; 
+            transform: translateX(2px); 
+        }
+        
+        .device-name { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #1a202c; /* High contrast */
+            margin-bottom: 8px;
+            word-break: break-word;
+            font-family: var(--font-text) !important;
+            line-height: 1.3;
+        }
+        
+        .device-info { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 6px; 
+            font-size: clamp(11px, 2.5vw, 12px); 
+        }
+        
+        .device-info-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 3px 0;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .device-label { 
+            color: #4a5568; /* Good contrast */
+            flex-shrink: 0;
+            min-width: 80px;
+            font-family: var(--font-text) !important;
+        }
+        
+        .device-value { 
+            color: #1a202c; /* High contrast */
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+            flex: 1;
+            font-family: var(--font-numbers) !important; /* Numbers and IPs use Roboto */
+        }
+        
+        .signal-bar { 
+            width: 100%; 
+            height: 6px; 
+            background: rgba(255,255,255,.1); 
+            border-radius: 3px; 
+            overflow: hidden; 
+            margin-top: 6px; 
+        }
+        
+        .signal-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #51cf66 0%, #4da6ff 100%); 
+            transition: width .3s; 
+        }
+        
+        /* Mobile-optimized admin interface */
+        .admin-menu { 
+            display: grid; 
+            gap: 12px; 
+        }
+        
+        .admin-btn { 
+            padding: 12px; 
+            background: rgba(77,166,255,.2); 
+            border: 2px solid #4da6ff; 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: clamp(12px, 3vw, 14px); 
+            cursor: pointer; 
+            transition: all .3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            touch-action: manipulation;
+        }
+        
+        .admin-btn:hover, .admin-btn:active { 
+            background: rgba(77,166,255,.4); 
+            transform: translateX(2px); 
+        }
+        
+        .admin-btn i { 
+            font-size: clamp(16px, 4vw, 20px);
+            flex-shrink: 0;
+        }
+        
+        .admin-info { 
+            background: rgba(0,40,80,.5); 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+        }
+        
+        .admin-info-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 6px 0; 
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            font-size: clamp(11px, 2.5vw, 12px);
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .admin-info-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .admin-info-item span:first-child {
+            flex-shrink: 0;
+            min-width: 80px;
+            color: rgba(255,255,255,.7);
+        }
+        
+        .admin-info-item span:last-child {
+            text-align: right;
+            word-break: break-all;
+            flex: 1;
+        }
+        
+        /* Mobile-optimized forms */
+        .form-group { 
+            margin: 15px 0; 
+        }
+        
+        .form-label { 
+            display: block; 
+            margin-bottom: 6px; 
+            color: #1a202c; /* High contrast */
+            font-weight: 600;
+            font-size: 14px;
+            font-family: var(--font-text) !important;
+            line-height: 1.3;
+        }
+        
+        .form-input { 
+            width: 100%; 
+            padding: 12px; 
+            background: #ffffff; /* White background */
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            color: #1a202c; /* High contrast */
+            font-size: 14px;
+            touch-action: manipulation;
+            font-family: var(--font-text) !important;
+            line-height: 1.4;
+        }
+        
+        .form-input:focus { 
+            outline: none; 
+            border-color: #4299e1; 
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-btn { 
+            padding: 12px 20px; 
+            background: linear-gradient(135deg, #4da6ff 0%, #667eea 100%); 
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: clamp(12px, 3vw, 14px); 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all .3s;
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+        
+        .form-btn:hover, .form-btn:active { 
+            transform: translateY(-1px); 
+        }
+        
+        .form-btn:disabled { 
+            opacity: .5; 
+            cursor: not-allowed; 
+        }
+        
+        /* Mobile-optimized alerts */
+        .alert { 
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            margin: 12px 0; 
+            font-size: clamp(12px, 3vw, 14px);
+            line-height: 1.4;
+        }
+        
+        .alert-success { 
+            background: rgba(81,207,102,.2); 
+            border: 1px solid #51cf66; 
+            color: #51cf66; 
+        }
+        
+        .alert-error { 
+            background: rgba(255,107,107,.2); 
+            border: 1px solid #ff6b6b; 
+            color: #ff6b6b; 
+        }
+        
+        .alert-info { 
+            background: rgba(77,166,255,.2); 
+            border: 1px solid #4da6ff; 
+            color: #4da6ff; 
+        }
+        
+        .setup-notice {
+            background: rgba(255,193,7,.2);
+            border: 2px solid #ffc107;
+            color: #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px;
+            text-align: center;
+        }
+        
+        .setup-notice h3 {
+            margin-bottom: 8px;
+            font-size: clamp(16px, 4vw, 18px);
+        }
+        
+        .setup-notice p {
+            margin-bottom: 12px;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        
+        .spinner { 
+            border: 4px solid rgba(255,255,255,.1); 
+            border-top: 4px solid #4da6ff; 
+            border-radius: 50%; 
+            width: 30px; 
+            height: 30px; 
+            animation: spin 1s linear infinite; 
+            margin: 15px auto; 
+        }
+        
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        
+        /* Tablet-specific adjustments */
+        @media (min-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: repeat(4, 1fr); /* Keep 4 columns on tablet */
+                grid-template-rows: 1fr; /* Single row */
+                gap: 12px; /* Reduced gap */
+                padding: 12px; /* Reduced padding */
+            }
+            
+            .chart-card {
+                padding: 12px; /* Reduced padding */
+            }
+        }
+            
+            .header {
+                padding: 10px 20px;
+            }
+            
+            .modal-content {
+                padding: 25px;
+                max-width: 700px;
+            }
+            
+            .device-info {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            
+            .network-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .ap-page-header {
+                padding: 25px;
+            }
+        }
+        
+        /* Desktop adjustments */
+        @media (min-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: repeat(4, 1fr); /* 4 columns across */
+                grid-template-rows: 1fr; /* Single row */
+                padding: 15px; /* Reduced padding */
+                gap: 15px; /* Reduced gap */
+            }
+            
+            .chart-card {
+                padding: 15px; /* Reduced padding */
+            }
+            
+            .modal.active {
+                align-items: center;
+                padding-top: 0;
+            }
+            
+            .modal-content {
+                max-width: 800px;
+                padding: 30px;
+            }
+            
+            .network-details {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .ap-page-header {
+                margin: 30px;
+                padding: 30px;
+            }
+            
+            .ap-content-container {
+                margin: 30px;
+                min-height: calc(100vh - 220px);
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .pi-icon {
+                box-shadow: 0 6px 25px rgba(102,126,234,.5);
+            }
+            
+            .chart-card {
+                box-shadow: 0 10px 40px rgba(0,0,0,.4);
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .header-btn, .admin-btn, .form-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .pi-icon {
+                min-width: 44px;
+                min-height: 44px;
+            }
+            
+            .modal-close {
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        
+        /* Legacy CSS for compatibility */
+        .modal-header {
+            display: flex;
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid rgba(77,166,255,.3); 
+        }
+        .modal-title { 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: #4da6ff; 
+        }
+        .modal-close { 
+            font-size: 28px; 
+            cursor: pointer; 
+            color: #fff; 
+            background: none; 
+            border: none; 
+            transition: all .3s; 
+        }
+        .modal-close:hover { 
+            color: #ff6b6b; 
+            transform: rotate(90deg); 
+        }
+        
+        .device-grid { 
+            display: grid; 
+            gap: 15px; 
+            margin-top: 20px; 
+        }
+        .device-item { 
+            background: rgba(0,40,80,.5); 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid rgba(77,166,255,.2); 
+            transition: all .3s; 
+        }
+        .device-item:hover { 
+            border-color: #4da6ff; 
+            transform: translateX(5px); 
+        }
+        .device-name { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #4da6ff; 
+            margin-bottom: 8px; 
+        }
+        .device-info { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; 
+            font-size: 12px; 
+        }
+        .device-info-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 4px 0; 
+        }
+        .device-label { 
+            color: rgba(255,255,255,.6); 
+        }
+        .device-value { 
+            color: #fff; 
+            font-weight: 500; 
+        }
+        .signal-bar { 
+            width: 100%; 
+            height: 8px; 
+            background: rgba(255,255,255,.1); 
+            border-radius: 4px; 
+            overflow: hidden; 
+            margin-top: 8px; 
+        }
+        .signal-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #51cf66 0%, #4da6ff 100%); 
+            transition: width .3s; 
+        }
+        
+        .spinner { 
+            border: 4px solid rgba(255,255,255,.1); 
+            border-top: 4px solid #4da6ff; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
+            margin: 20px auto; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        
+        .admin-menu { 
+            display: grid; 
+            gap: 15px; 
+        }
+        .admin-btn { 
+            padding: 15px; 
+            background: rgba(77,166,255,.2); 
+            border: 2px solid #4da6ff; 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: 14px; 
+            cursor: pointer; 
+            transition: all .3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .admin-btn:hover { 
+            background: rgba(77,166,255,.4); 
+            transform: translateX(5px); 
+        }
+        .admin-btn i { 
+            font-size: 20px; 
+        }
+        .admin-info { 
+            background: rgba(0,40,80,.5); 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+        }
+        .admin-info-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid rgba(255,255,255,.1); 
+        }
+        .admin-info-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .form-group { 
+            margin: 20px 0; 
+        }
+        .form-label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #4da6ff; 
+            font-weight: 600; 
+        }
+        .form-input { 
+            width: 100%; 
+            padding: 12px; 
+            background: rgba(0,40,80,.5); 
+            border: 2px solid rgba(77,166,255,.3); 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: 14px; 
+        }
+        .form-input:focus { 
+            outline: none; 
+            border-color: #4da6ff; 
+        }
+        .form-btn { 
+            padding: 12px 24px; 
+            background: linear-gradient(135deg, #4da6ff 0%, #667eea 100%); 
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all .3s; 
+        }
+        .form-btn:hover { 
+            transform: translateY(-2px); 
+        }
+        .form-btn:disabled { 
+            opacity: .5; 
+            cursor: not-allowed; 
+        }
+        
+        .alert { 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            font-size: 14px; 
+        }
+        .alert-success { 
+            background: rgba(81,207,102,.2); 
+            border: 1px solid #51cf66; 
+            color: #51cf66; 
+        }
+        .alert-error { 
+            background: rgba(255,107,107,.2); 
+            border: 1px solid #ff6b6b; 
+            color: #ff6b6b; 
+        }
+        .alert-info { 
+            background: rgba(77,166,255,.2); 
+            border: 1px solid #4da6ff; 
+            color: #4da6ff; 
+        }
+
+        .setup-notice {
+            background: rgba(255,193,7,.2);
+            border: 2px solid #ffc107;
+            color: #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+        }
+        .setup-notice h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .setup-notice p {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">
+            <div class="network-name" id="networkName">Network Event Dashboard</div>
+            <div class="header-subtitle">
+                <span class="version">v7.0.4-real-ap-data</span> • 
+                <span class="email">drlentz@eero.com</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="time-range-selector">
+                <select id="timeRange" onchange="changeTimeRange()">
+                    <option value="1">Last Hour</option>
+                    <option value="4">Last 4 Hours</option>
+                    <option value="8">Last 8 Hours</option>
+                    <option value="12">Last 12 Hours</option>
+                    <option value="24">Last 24 Hours</option>
+                    <option value="168">Last Week</option>
+                </select>
+            </div>
+            <a href="/api/export/csv" class="csv-export-btn" title="Export Network Data to CSV">
+                <i class="fas fa-download"></i><span>CSV</span>
+            </a>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="lastUpdate">Loading...</span>
+            </div>
+            <button class="header-btn" onclick="showDevices()">
+                <i class="fas fa-list"></i><span>Devices</span>
+            </button>
+            <button class="header-btn" id="kioskModeBtn" onclick="toggleKioskMode()" title="Toggle Kiosk Mode">
+                <i class="fas fa-tv"></i><span>Kiosk</span>
+            </button>
+            <button class="header-btn" onclick="togglePage()" id="pageToggleBtn" style="background: rgba(255,107,107,.2); border-color: #ff6b6b;">
+                <i class="fas fa-wifi"></i><span>APs</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Dashboard Content -->
+    <div id="mainDashboard" class="dashboard-page active">
+        <div class="dashboard-container">
+            <div class="chart-card">
+                <div class="chart-title">Connected Devices</div>
+                <div class="chart-subtitle">All connected devices over time</div>
+                <div class="chart-container"><canvas id="usersChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Device Types</div>
+                <div class="chart-subtitle" id="deviceOsSubtitle">Loading...</div>
+                <div class="chart-container"><canvas id="deviceOSChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Frequency Distribution</div>
+                <div class="chart-subtitle" id="frequencySubtitle">Wireless devices only</div>
+                <div class="chart-container"><canvas id="frequencyChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Per-Network Information</div>
+                <div class="chart-subtitle">Individual network statistics</div>
+                <div id="networkInfoContainer" class="network-info-container">
+                    <div id="networkInfoList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AP Distribution Page -->
+    <div id="apDashboard" class="dashboard-page">
+        <div class="ap-page-header">
+            <h2 class="ap-page-title">Real-Time AP Device Distribution</h2>
+            <p class="ap-page-subtitle">Live device assignments showing actual connected devices per access point</p>
+        </div>
+        <div id="apVisualizationContainer" class="ap-content-container">
+            <div id="apVisualizationContent">
+                <div style="color: #4da6ff; text-align: center; padding: 20px; background: rgba(77,166,255,0.2); border: 2px solid #4da6ff; border-radius: 8px; margin: 10px;">
+                    🔄 Click "APs" button to load AP data...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <div class="pi-icon" onclick="showAdmin()">π</div>
+    
+    <!-- Setup Notice (shown when not configured) -->
+    <div id="setupNotice" class="setup-notice" style="display: none;">
+        <h3><i class="fas fa-exclamation-triangle"></i> Configuration Required</h3>
+        <p>Please configure your Network ID and API authentication to start monitoring.</p>
+        <button class="form-btn" onclick="showAdmin()">Open Admin Panel</button>
+    </div>
+    
+    <!-- Devices Modal -->
+    <div id="devicesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Connected Devices</h2>
+                <button class="modal-close" onclick="closeModal('devicesModal')">&times;</button>
+            </div>
+            <div id="devicesList" class="device-grid"></div>
+        </div>
+    </div>
+    
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Admin Panel</h2>
+                <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+            </div>
+            <div class="admin-info" id="adminInfo"></div>
+            <div class="admin-menu">
+                <button class="admin-btn" onclick="updateDashboard()">
+                    <i class="fas fa-sync"></i><span>Check for Updated Dashboard Code</span>
+                </button>
+                <button class="admin-btn" onclick="showNetworksManager()">
+                    <i class="fas fa-network-wired"></i><span>Manage Networks</span>
+                </button>
+                <button class="admin-btn" onclick="showNetworkIdForm()">
+                    <i class="fas fa-edit"></i><span>Quick Network ID Change</span>
+                </button>
+                <button class="admin-btn" onclick="showTimezoneForm()">
+                    <i class="fas fa-clock"></i><span>Change Timezone</span>
+                </button>
+                <button class="admin-btn" onclick="showKioskSettingsForm()">
+                    <i class="fas fa-tv"></i><span>Kiosk Mode Settings</span>
+                </button>
+                <button class="admin-btn" onclick="showReauthorizeForm()">
+                    <i class="fas fa-key"></i><span>Legacy Reauthorize</span>
+                </button>
+            </div>
+            <div id="adminFormContainer"></div>
+            <div id="adminAlerts"></div>
+        </div>
+    </div>
+    
+    <script>
+        let charts = {};
+        let isConfigured = false;
+        let currentTimeRange = 1; // Default to 1 hour
+        let chartInitialized = false;
+        let dataLoadRetries = 0;
+        const MAX_RETRIES = 3;
+        
+        // Kiosk mode variables
+        let kioskMode = false;
+        let kioskInterval = null;
+        let kioskDashboardTime = 5000; // 5 seconds default
+        let kioskCapacityTime = 7000; // 7 seconds default
+        let kioskCurrentPage = 'main';
+        
+        // Data caching for seamless kiosk transitions
+        let cachedAPData = null;
+        let cacheUpdateInterval = null;
+        let lastAPDataUpdate = 0;
+        const CACHE_REFRESH_INTERVAL = 30000; // Refresh cache every 30 seconds
+        
+        // Data pre-loading and caching functions
+        async function preloadAPData() {
+            try {
+                console.log("Pre-loading AP data for seamless transitions...");
+                const response = await fetch("/api/ap-data");
+                const data = await response.json();
+                cachedAPData = data;
+                lastAPDataUpdate = Date.now();
+                console.log("AP data cached successfully");
+                return data;
+            } catch (error) {
+                console.error("Error pre-loading AP data:", error);
+                return null;
+            }
+        }
+        
+        function displayCachedAPVisualization() {
+            if (!cachedAPData) {
+                console.log("No cached AP data available, loading fresh data...");
+                loadAPVisualization();
+                return;
+            }
+            
+            console.log("Using cached AP data for instant display");
+            const container = document.getElementById("apVisualizationContent");
+            
+            if (!container) {
+                console.error("AP visualization container not found!");
+                return;
+            }
+            
+            // Use cached data to display immediately
+            displayAPVisualization(cachedAPData.networks || {});
+        }
+        
+        function startCacheUpdates() {
+            // Initial cache load
+            preloadAPData();
+            
+            // Set up regular cache updates
+            cacheUpdateInterval = setInterval(() => {
+                if (Date.now() - lastAPDataUpdate > CACHE_REFRESH_INTERVAL) {
+                    preloadAPData();
+                }
+            }, CACHE_REFRESH_INTERVAL);
+        }
+        
+        function stopCacheUpdates() {
+            if (cacheUpdateInterval) {
+                clearInterval(cacheUpdateInterval);
+                cacheUpdateInterval = null;
+            }
+        }
+        // Kiosk mode functions
+        function toggleKioskMode() {
+            kioskMode = !kioskMode;
+            const kioskBtn = document.getElementById('kioskModeBtn');
+            
+            if (kioskMode) {
+                startKioskMode();
+                kioskBtn.style.background = 'var(--color-success)';
+                kioskBtn.style.borderColor = 'var(--color-success)';
+                kioskBtn.innerHTML = '<i class="fas fa-tv"></i><span>Exit Kiosk</span>';
+                kioskBtn.classList.add('active');
+                
+                // Hide other buttons during kiosk mode for cleaner look
+                document.querySelectorAll('.header-btn:not(#kioskModeBtn)').forEach(btn => {
+                    btn.style.opacity = '0.5';
+                });
+            } else {
+                stopKioskMode();
+                kioskBtn.style.background = 'var(--color-primary)';
+                kioskBtn.style.borderColor = 'var(--color-primary)';
+                kioskBtn.innerHTML = '<i class="fas fa-tv"></i><span>Kiosk</span>';
+                kioskBtn.classList.remove('active');
+                
+                // Restore other buttons
+                document.querySelectorAll('.header-btn:not(#kioskModeBtn)').forEach(btn => {
+                    btn.style.opacity = '1';
+                });
+            }
+        }
+        
+        function startKioskMode() {
+            console.log('Starting kiosk mode with seamless transitions');
+            
+            // Start cache updates for seamless transitions
+            startCacheUpdates();
+            
+            kioskCurrentPage = 'main';
+            showPage('main');
+            scheduleNextKioskSwitch();
+        }
+        
+        function stopKioskMode() {
+            console.log('Stopping kiosk mode');
+            
+            // Stop cache updates
+            stopCacheUpdates();
+            
+            if (kioskInterval) {
+                clearTimeout(kioskInterval);
+                kioskInterval = null;
+            }
+        }
+        
+        function scheduleNextKioskSwitch() {
+            if (!kioskMode) return;
+            
+            let nextDelay;
+            let nextPage;
+            
+            if (kioskCurrentPage === 'main') {
+                nextDelay = kioskDashboardTime;
+                nextPage = 'ap';
+            } else {
+                nextDelay = kioskCapacityTime;
+                nextPage = 'main';
+            }
+            
+            kioskInterval = setTimeout(() => {
+                if (kioskMode) {
+                    kioskCurrentPage = nextPage;
+                    showPageSeamless(nextPage);
+                    scheduleNextKioskSwitch();
+                }
+            }, nextDelay);
+        }
+        
+        // Seamless page switching for kiosk mode
+        function showPageSeamless(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.dashboard-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId + 'Dashboard');
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentPage = pageId;
+                updatePageToggleButton();
+                
+                // Use cached data for instant AP page display
+                if (pageId === 'ap') {
+                    console.log("Switching to AP page with cached data...");
+                    setTimeout(() => displayCachedAPVisualization(), 10); // Minimal delay for DOM update
+                }
+            }
+        }
+        
+        // Load kiosk settings from server
+        async function loadKioskSettings() {
+            try {
+                const response = await fetch('/api/admin/kiosk-settings');
+                const data = await response.json();
+                if (data.success) {
+                    kioskDashboardTime = data.dashboard_time || 5000;
+                    kioskCapacityTime = data.capacity_time || 7000;
+                }
+            } catch (error) {
+                console.log('Using default kiosk settings');
+            }
+        }
+        
+        // Network rename functionality
+        function startNetworkRename(networkId) {
+            const nameDisplay = document.getElementById(`network-name-${networkId}`);
+            const renameForm = document.getElementById(`rename-form-${networkId}`);
+            const renameInput = document.getElementById(`rename-input-${networkId}`);
+            
+            if (nameDisplay && renameForm && renameInput) {
+                nameDisplay.style.display = 'none';
+                renameForm.style.display = 'flex';
+                renameInput.focus();
+                renameInput.select();
+            }
+        }
+        
+        function cancelNetworkRename(networkId) {
+            const nameDisplay = document.getElementById(`network-name-${networkId}`);
+            const renameForm = document.getElementById(`rename-form-${networkId}`);
+            
+            if (nameDisplay && renameForm) {
+                nameDisplay.style.display = 'block';
+                renameForm.style.display = 'none';
+            }
+        }
+        
+        async function saveNetworkRename(networkId) {
+            const renameInput = document.getElementById(`rename-input-${networkId}`);
+            const newName = renameInput.value.trim();
+            
+            if (!newName) {
+                alert('Network name cannot be empty');
+                return;
+            }
+            
+            if (newName.length > 50) {
+                alert('Network name too long (max 50 characters)');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/networks/${networkId}/rename`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: newName })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the display
+                    const nameDisplay = document.getElementById(`network-name-${networkId}`);
+                    if (nameDisplay) {
+                        nameDisplay.textContent = newName;
+                    }
+                    
+                    // Hide the form
+                    cancelNetworkRename(networkId);
+                    
+                    // Refresh the network info to show updated name
+                    setTimeout(() => {
+                        updateNetworkInfoDisplay();
+                    }, 500);
+                    
+                    console.log('Network renamed successfully:', data.message);
+                } else {
+                    alert('Error renaming network: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error renaming network:', error);
+                alert('Error renaming network. Please try again.');
+            }
+        }
+        
+        // Add keyboard support for rename input
+        document.addEventListener('keydown', function(event) {
+            if (event.target.classList.contains('network-rename-input')) {
+                if (event.key === 'Enter') {
+                    const networkId = event.target.id.replace('rename-input-', '');
+                    saveNetworkRename(networkId);
+                } else if (event.key === 'Escape') {
+                    const networkId = event.target.id.replace('rename-input-', '');
+                    cancelNetworkRename(networkId);
+                }
+            }
+        });
+        
+        let currentPage = 'main'; // 'main' or 'ap'
+        
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.dashboard-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId + 'Dashboard');
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentPage = pageId;
+                updatePageToggleButton();
+                
+                // Load AP data when switching to AP page
+                if (pageId === 'ap') {
+                    console.log("Switching to AP page, loading AP data...");
+                    
+                    // Use cached data if available and recent, otherwise load fresh
+                    if (cachedAPData && (Date.now() - lastAPDataUpdate < CACHE_REFRESH_INTERVAL)) {
+                        console.log("Using cached AP data for faster display");
+                        setTimeout(() => displayCachedAPVisualization(), 10);
+                    } else {
+                        console.log("Loading fresh AP data");
+                        setTimeout(() => loadAPVisualization(), 100);
+                    }
+                }
+            }
+        }
+        
+        function togglePage() {
+            if (currentPage === 'main') {
+                showPage('ap');
+            } else {
+                showPage('main');
+            }
+        }
+        
+        function updatePageToggleButton() {
+            const btn = document.getElementById('pageToggleBtn');
+            if (currentPage === 'main') {
+                btn.innerHTML = '<i class="fas fa-wifi"></i><span>Capacity</span>';
+                btn.style.background = 'rgba(255,107,107,.2)';
+                btn.style.borderColor = '#ff6b6b';
+            } else {
+                btn.innerHTML = '<i class="fas fa-chart-bar"></i><span>Dashboard</span>';
+                btn.style.background = 'rgba(77,166,255,.2)';
+                btn.style.borderColor = '#4da6ff';
+            }
+        }
+        
+        // Initialize page on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('main'); // Start with main dashboard
+        });
+        
+        // Legacy function for compatibility
+        function scrollToAPSection() {
+            showPage('ap');
+        }
+        
+        function changeTimeRange() {
+            currentTimeRange = parseInt(document.getElementById('timeRange').value);
+            updateDashboardData();
+        }
+        
+        function initCharts() {
+            try {
+                if (chartInitialized) {
+                    console.log("Charts already initialized");
+                    return;
+                }
+                
+                console.log("Initializing charts...");
+                
+                const commonOptions = {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    animation: false, // Disable all animations
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#1a202c", // Dark text for better contrast
+                                padding: 10,
+                                usePointStyle: true
+                            },
+                            position: 'bottom'
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 5,
+                            bottom: 5,
+                            left: 5,
+                            right: 5
+                        }
+                    }
+                };
+                
+                // Connected Users Chart
+                const usersCtx = document.getElementById("usersChart");
+                if (!usersCtx) {
+                    console.error("Users chart canvas not found");
+                    return false;
+                }
+                
+                charts.users = new Chart(usersCtx.getContext("2d"), {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: "Connected",
+                            data: [],
+                            borderColor: "#4da6ff",
+                            backgroundColor: "rgba(77,166,255,0.1)",
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            y: { 
+                                ticks: { color: "#1a202c" }, // Dark text for better contrast
+                                beginAtZero: true
+                            },
+                            x: { ticks: { color: "#1a202c" } } // Dark text for better contrast
+                        }
+                    }
+                });
+                
+                // Device OS Chart
+                const deviceOSCtx = document.getElementById("deviceOSChart");
+                if (!deviceOSCtx) {
+                    console.error("Device OS chart canvas not found");
+                    return false;
+                }
+                
+                charts.deviceOS = new Chart(deviceOSCtx.getContext("2d"), {
+                    type: "doughnut",
+                    data: {
+                        labels: ["iOS", "Android", "Windows", "Amazon", "Gaming", "Streaming", "Other"],
+                        datasets: [{
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: ["#4da6ff", "#51cf66", "#74c0fc", "#ff922b", "#e599f7", "#ffd43b", "#868e96"]
+                        }]
+                    },
+                    options: commonOptions
+                });
+                
+                // Frequency Chart
+                const frequencyCtx = document.getElementById("frequencyChart");
+                if (!frequencyCtx) {
+                    console.error("Frequency chart canvas not found");
+                    return false;
+                }
+                
+                charts.frequency = new Chart(frequencyCtx.getContext("2d"), {
+                    type: "doughnut",
+                    data: {
+                        labels: ["2.4 GHz", "5 GHz", "6 GHz"],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ["#ff922b", "#4da6ff", "#b197fc"]
+                        }]
+                    },
+                    options: commonOptions
+                });
+                
+                // Signal Strength Chart
+                // Network Info Display (replaces signal strength chart)
+                loadNetworkInfoStatic();
+                
+                // Don't load AP visualization initially - only when AP page is accessed
+                
+                chartInitialized = true;
+                console.log("Charts initialized successfully");
+                return true;
+                
+            } catch (error) {
+                console.error("Chart initialization error:", error);
+                chartInitialized = false;
+                return false;
+            }
+        }
+        
+        async function debugSignalData() {
+            try {
+                const response = await fetch("/api/debug/signal");
+                const data = await response.json();
+                console.log("Signal debug data:", data);
+                return data;
+            } catch (error) {
+                console.error("Error fetching signal debug data:", error);
+                return null;
+            }
+        }
+        
+        async function loadNetworkName() {
+            try {
+                const response = await fetch("/api/network");
+                const data = await response.json();
+                
+                if (data.success && data.name !== 'Unknown Network') {
+                    document.getElementById("networkName").textContent = `${data.name} Event Dashboard`;
+                } else {
+                    document.getElementById("networkName").textContent = "Network Event Dashboard";
+                }
+            } catch (error) {
+                console.error("Error loading network name:", error);
+                document.getElementById("networkName").textContent = "Network Event Dashboard";
+            }
+        }
+        
+        async function loadNetworkInfoStatic() {
+            try {
+                const response = await fetch("/api/network-stats");
+                const data = await response.json();
+                displayNetworkInfoStatic(data.networks || []);
+            } catch (error) {
+                console.error("Error loading network info:", error);
+                document.getElementById("networkInfoList").innerHTML = '<div style="color: #ff6b6b; text-align: center; padding: 20px;">Error loading network information</div>';
+            }
+        }
+        
+        function displayNetworkInfoStatic(networks) {
+            const container = document.getElementById("networkInfoList");
+            
+            if (!networks || networks.length === 0) {
+                container.innerHTML = '<div style="color: var(--color-text-secondary); text-align: center; padding: 20px;">No networks configured</div>';
+                return;
+            }
+            
+            // Sort networks by total device count (highest to lowest)
+            const sortedNetworks = [...networks].sort((a, b) => {
+                const devicesA = a.total_devices || 0;
+                const devicesB = b.total_devices || 0;
+                return devicesB - devicesA; // Descending order (most clients first)
+            });
+            
+            container.innerHTML = sortedNetworks.map(network => {
+                const deviceTypes = Object.entries(network.device_os || {})
+                    .filter(([type, count]) => count > 0)
+                    .map(([type, count]) => `<span class="device-type-badge">${type}: ${count}</span>`)
+                    .join('');
+                
+                const frequencies = Object.entries(network.frequency_distribution || {})
+                    .filter(([freq, count]) => count > 0)
+                    .map(([freq, count]) => `<span class="device-type-badge">${freq}: ${count}</span>`)
+                    .join('');
+                
+                return `
+                    <div class="network-info-item">
+                        <div class="network-info-header">
+                            <div class="network-name-info">
+                                <span class="network-name-display" id="network-name-${network.id}">${network.name || `Network ${network.id}`}</span>
+                                <button class="network-rename-btn" onclick="startNetworkRename('${network.id}')" title="Rename network">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <div class="network-rename-form" id="rename-form-${network.id}" style="display: none;">
+                                    <input type="text" class="network-rename-input" id="rename-input-${network.id}" value="${network.name || `Network ${network.id}`}" maxlength="50">
+                                    <button class="network-rename-save" onclick="saveNetworkRename('${network.id}')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="network-rename-cancel" onclick="cancelNetworkRename('${network.id}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="network-status ${network.authenticated ? 'authenticated' : 'not-authenticated'}">
+                                ${network.authenticated ? '✓ Connected' : '✗ Not Connected'}
+                            </div>
+                        </div>
+                        <div class="network-details">
+                            <div class="network-detail-item">
+                                <div class="network-detail-label">Network ID</div>
+                                <div class="network-detail-value">
+                                    <a href="https://insight.eero.com/networks/${network.id}" target="_blank" class="network-id-link">${network.id}</a>
+                                </div>
+                            </div>
+                            <div class="network-detail-item">
+                                <div class="network-detail-label">Total Devices</div>
+                                <div class="network-detail-value">${network.total_devices || 0}</div>
+                            </div>
+                            <div class="network-detail-item">
+                                <div class="network-detail-label">Wireless</div>
+                                <div class="network-detail-value">${network.wireless_devices || 0}</div>
+                            </div>
+                            <div class="network-detail-item">
+                                <div class="network-detail-label">Wired</div>
+                                <div class="network-detail-value">${network.wired_devices || 0}</div>
+                            </div>
+                            ${network.api_name ? `
+                            <div class="network-detail-item">
+                                <div class="network-detail-label">API Name</div>
+                                <div class="network-detail-value">${network.api_name}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${deviceTypes ? `
+                        <div class="network-detail-item" style="margin-top: 8px;">
+                            <div class="network-detail-label">Device Types</div>
+                            <div class="device-breakdown">${deviceTypes}</div>
+                        </div>
+                        ` : ''}
+                        ${frequencies ? `
+                        <div class="network-detail-item" style="margin-top: 8px;">
+                            <div class="network-detail-label">Frequencies</div>
+                            <div class="device-breakdown">${frequencies}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateNetworkInfoDisplay() {
+            // Refresh the network info display
+            loadNetworkInfoStatic();
+        }
+        
+        async function loadAPVisualization() {
+            console.log("Loading AP visualization...");
+            const container = document.getElementById("apVisualizationContent");
+            
+            if (!container) {
+                console.error("AP visualization container not found!");
+                return;
+            }
+            
+            // First, show a prominent test message to confirm the function is running
+            container.innerHTML = '<div style="color: #4da6ff; text-align: center; padding: 20px; background: rgba(77,166,255,0.2); border: 2px solid #4da6ff; border-radius: 8px; margin: 10px;">🔄 AP Visualization Loading...</div>';
+            
+            try {
+                const response = await fetch("/api/ap-data");
+                const data = await response.json();
+                console.log("AP data received:", data);
+                
+                // Show success message with data count
+                container.innerHTML = `
+                    <div style="color: #51cf66; text-align: center; padding: 20px; background: rgba(81,207,102,0.2); border: 2px solid #51cf66; border-radius: 8px; margin: 10px;">
+                        ✅ AP Data Loaded Successfully!<br>
+                        Found ${Object.keys(data.networks || {}).length} networks with AP data<br>
+                        <small>Processing visualization...</small>
+                    </div>
+                `;
+                
+                // Then call the full display function
+                setTimeout(() => {
+                    displayAPVisualization(data.networks || {});
+                }, 1000);
+                
+            } catch (error) {
+                console.error("Error loading AP data:", error);
+                container.innerHTML = 
+                    '<div style="color: #ff6b6b; text-align: center; padding: 20px; background: rgba(255,107,107,0.2); border: 2px solid #ff6b6b; border-radius: 8px; margin: 10px;">❌ Error loading AP data: ' + error.message + '</div>';
+            }
+        }
+        
+        function displayAPVisualization(networks) {
+            console.log("Displaying AP visualization with networks:", networks);
+            const container = document.getElementById("apVisualizationContent");
+            
+            if (!container) {
+                console.error("AP visualization container not found!");
+                return;
+            }
+            
+            if (!networks || Object.keys(networks).length === 0) {
+                console.log("No networks data available");
+                container.innerHTML = '<div style="color: var(--color-text-secondary); text-align: center; padding: 20px;">No AP data available</div>';
+                return;
+            }
+            
+            console.log("Processing", Object.keys(networks).length, "networks");
+            
+            // Helper function to extract device name from full name
+            function extractDeviceName(fullName) {
+                // Extract text within parentheses, or use full name if no parentheses
+                const match = fullName.match(/\(([^)]+)\)/);
+                return match ? match[1] : fullName;
+            }
+            
+            // Generate colors for donut chart
+            function generateColors(count) {
+                const colors = [
+                    '#4da6ff', '#51cf66', '#ff922b', '#e599f7', '#ffd43b', 
+                    '#74c0fc', '#ff6b6b', '#b197fc', '#69db7c', '#ffa8a8',
+                    '#91a7ff', '#ffc947', '#8ce99a', '#ffb3ba', '#bae1ff'
+                ];
+                return colors.slice(0, count);
+            }
+            
+            // Generate background colors for AP cards (lighter, more subtle versions)
+            function generateBackgroundColors(count) {
+                const backgroundColors = [
+                    'rgba(77, 166, 255, 0.15)',   // Periwinkle blue with transparency
+                    'rgba(81, 207, 102, 0.15)',   // Green with transparency
+                    'rgba(255, 146, 43, 0.15)',   // Orange with transparency
+                    'rgba(229, 153, 247, 0.15)',  // Purple with transparency
+                    'rgba(116, 192, 252, 0.15)',  // Light blue with transparency
+                    'rgba(105, 219, 124, 0.15)',  // Light green with transparency
+                    'rgba(255, 212, 59, 0.15)',   // Yellow with transparency
+                    'rgba(255, 107, 107, 0.15)',  // Red with transparency
+                    'rgba(177, 151, 252, 0.15)',  // Light purple with transparency
+                    'rgba(145, 167, 255, 0.15)',  // Soft blue with transparency
+                    'rgba(140, 233, 154, 0.15)',  // Soft green with transparency
+                    'rgba(255, 168, 168, 0.15)',  // Soft red with transparency
+                    'rgba(208, 191, 255, 0.15)',  // Very soft purple with transparency
+                    'rgba(165, 216, 255, 0.15)',  // Very soft blue with transparency
+                    'rgba(195, 250, 232, 0.15)'   // Very soft green with transparency
+                ];
+                return backgroundColors.slice(0, count);
+            }
+            
+            const networksHtml = Object.entries(networks).map(([networkId, networkData]) => {
+                const apData = networkData.ap_data || {};
+                console.log(`Network ${networkId} has ${Object.keys(apData).length} APs`);
+                
+                if (Object.keys(apData).length === 0) {
+                    return `
+                        <div class="network-ap-section">
+                            <div class="network-ap-content">
+                                <div class="network-ap-header">
+                                    <a href="https://insight.eero.com/networks/${networkId}" target="_blank" style="color: #4da6ff; text-decoration: none;">${networkData.network_name}</a>
+                                    <span class="network-ap-id">ID: ${networkId}</span>
+                                </div>
+                                <div style="color: var(--color-text-secondary); text-align: center; padding: 10px;">
+                                    ${networkData.authenticated ? 'No AP data available' : 'Network not authenticated'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Prepare data for donut chart
+                const apNames = [];
+                const apDeviceCounts = [];
+                const apColors = generateColors(Object.keys(apData).length);
+                const apBackgroundColors = generateBackgroundColors(Object.keys(apData).length);
+                
+                // Sort APs by device count (highest to lowest) for display order
+                const sortedApEntries = Object.entries(apData).sort(([, apA], [, apB]) => {
+                    const totalA = apA.total_devices || 0;
+                    const totalB = apB.total_devices || 0;
+                    return totalB - totalA; // Descending order (most clients first)
+                });
+                
+                const apsHtml = sortedApEntries.map(([apId, ap], index) => {
+                    const total = ap.total_devices || 0;
+                    const freq24 = ap.devices_by_freq['2.4GHz'] || 0;
+                    const freq5 = ap.devices_by_freq['5GHz'] || 0;
+                    const freq6 = ap.devices_by_freq['6GHz'] || 0;
+                    
+                    // Add to chart data
+                    const cleanName = extractDeviceName(ap.name);
+                    apNames.push(cleanName);
+                    apDeviceCounts.push(total);
+                    
+                    // Calculate percentages for bar segments
+                    const total24Pct = total > 0 ? (freq24 / total) * 100 : 0;
+                    const total5Pct = total > 0 ? (freq5 / total) * 100 : 0;
+                    const total6Pct = total > 0 ? (freq6 / total) * 100 : 0;
+                    
+                    // Extract clean device name and create AP link
+                    const numericId = ap.numeric_id || apId; // Use numeric_id if available, fallback to apId
+                    const apLink = `https://insight.eero.com/eeros/${numericId}`;
+                    
+                    // Get coordinated background color for this AP
+                    const backgroundColor = apBackgroundColors[index] || 'rgba(0,80,160,.2)';
+                    
+                    return `
+                        <div class="ap-item" style="background: ${backgroundColor}; border-left: 3px solid ${apColors[index] || '#4da6ff'};">
+                            <div class="ap-name">
+                                <a href="${apLink}" target="_blank" style="color: var(--color-primary); text-decoration: none; border-bottom: 1px dotted var(--color-primary);">${cleanName}</a>
+                            </div>
+                            <div class="ap-model">${ap.model}${ap.location ? ` • ${ap.location}` : ''}${ap.serial ? ` • ...${ap.serial.slice(-4)}` : ''}</div>
+                            <div class="frequency-bar-container">
+                                <div class="frequency-bar">
+                                    ${freq24 > 0 ? `<div class="freq-segment freq-24ghz" style="width: ${total24Pct}%">${freq24}</div>` : ''}
+                                    ${freq5 > 0 ? `<div class="freq-segment freq-5ghz" style="width: ${total5Pct}%">${freq5}</div>` : ''}
+                                    ${freq6 > 0 ? `<div class="freq-segment freq-6ghz" style="width: ${total6Pct}%">${freq6}</div>` : ''}
+                                    ${total === 0 ? '<div class="freq-segment" style="width: 100%; background: rgba(255,255,255,0.1);">No devices</div>' : ''}
+                                </div>
+                            </div>
+                            <div class="ap-stats">
+                                <span>Devices: 2.4GHz: ${freq24} | 5GHz: ${freq5} | 6GHz: ${freq6}</span>
+                                <span class="ap-total">Real Devices: ${total}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Create unique chart ID for this network
+                const chartId = `apChart_${networkId}`;
+                
+                return `
+                    <div class="network-ap-section">
+                        <div class="network-ap-chart">
+                            <div class="network-ap-chart-title">Device Distribution</div>
+                            <canvas id="${chartId}" width="180" height="180"></canvas>
+                        </div>
+                        <div class="network-ap-content">
+                            <div class="network-ap-header">
+                                <a href="https://insight.eero.com/networks/${networkId}" target="_blank" style="color: #4da6ff; text-decoration: none;">${networkData.network_name}</a>
+                                <span class="network-ap-id">ID: ${networkId}</span>
+                            </div>
+                            <div class="ap-list">
+                                ${apsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log("Setting container HTML, length:", networksHtml.length);
+            container.innerHTML = networksHtml;
+            
+            // Create donut charts after HTML is inserted
+            setTimeout(() => {
+                Object.entries(networks).forEach(([networkId, networkData]) => {
+                    const apData = networkData.ap_data || {};
+                    
+                    if (Object.keys(apData).length > 0) {
+                        createAPDonutChart(networkId, apData);
+                    }
+                });
+            }, 100);
+            
+            console.log("AP visualization updated successfully");
+        }
+        
+        function createAPDonutChart(networkId, apData) {
+            const chartId = `apChart_${networkId}`;
+            const canvas = document.getElementById(chartId);
+            
+            if (!canvas) {
+                console.error(`Canvas ${chartId} not found`);
+                return;
+            }
+            
+            // Helper function to extract device name from full name
+            function extractDeviceName(fullName) {
+                const match = fullName.match(/\(([^)]+)\)/);
+                return match ? match[1] : fullName;
+            }
+            
+            // Generate colors based on Eero brand palette (midnight blue primary theme)
+            function generateColorsBasedOnDeviceCount(apDeviceCounts) {
+                if (apDeviceCounts.length === 0) return [];
+                
+                // Sort device counts to determine ranges
+                const sortedCounts = [...apDeviceCounts].sort((a, b) => b - a);
+                const maxCount = sortedCounts[0];
+                const minCount = sortedCounts[sortedCounts.length - 1];
+                
+                // Eero Brand Color Palette
+                const primaryBlues = ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe']; // Midnight blue to light blue (HIGH traffic)
+                const brandGreens = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0']; // Eero green variations (MEDIUM-HIGH traffic)
+                const brandYellows = ['#d97706', '#f59e0b', '#fbbf24', '#fcd34d', '#fef3c7']; // Eero yellow/amber (MEDIUM traffic)
+                const brandAccents = ['#dc2626', '#ef4444', '#f87171', '#fca5a5', '#fecaca']; // Red accents (LOW traffic)
+                
+                return apDeviceCounts.map(count => {
+                    if (apDeviceCounts.length === 1) {
+                        // Single AP - use primary brand blue
+                        return primaryBlues[2];
+                    }
+                    
+                    // Calculate percentage of max count
+                    const percentage = count / maxCount;
+                    
+                    if (percentage >= 0.75) {
+                        // Highest traffic - Primary BLUE shades (brand primary)
+                        const index = Math.min(Math.floor((1 - percentage) * primaryBlues.length * 4), primaryBlues.length - 1);
+                        return primaryBlues[index];
+                    } else if (percentage >= 0.5) {
+                        // High traffic - Brand GREEN shades (secondary brand color)
+                        const normalizedPercentage = (percentage - 0.5) / 0.25;
+                        const index = Math.min(Math.floor(normalizedPercentage * brandGreens.length), brandGreens.length - 1);
+                        return brandGreens[index];
+                    } else if (percentage >= 0.25) {
+                        // Medium traffic - Brand YELLOW/AMBER shades (tertiary brand color)
+                        const normalizedPercentage = (percentage - 0.25) / 0.25;
+                        const index = Math.min(Math.floor(normalizedPercentage * brandYellows.length), brandYellows.length - 1);
+                        return brandYellows[index];
+                    } else {
+                        // Low traffic - Brand RED accent shades (attention color)
+                        const normalizedPercentage = percentage / 0.25;
+                        const index = Math.min(Math.floor(normalizedPercentage * brandAccents.length), brandAccents.length - 1);
+                        return brandAccents[index];
+                    }
+                });
+            }
+            
+            // Prepare chart data
+            const apNames = [];
+            const apDeviceCounts = [];
+            
+            // Sort APs by device count (highest to lowest) for consistent ordering
+            const sortedApEntries = Object.entries(apData).sort(([, apA], [, apB]) => {
+                const totalA = apA.total_devices || 0;
+                const totalB = apB.total_devices || 0;
+                return totalB - totalA; // Descending order (most clients first)
+            });
+            
+            sortedApEntries.forEach(([apId, ap]) => {
+                const cleanName = extractDeviceName(ap.name);
+                const deviceCount = ap.total_devices || 0;
+                
+                if (deviceCount > 0) { // Only include APs with devices
+                    apNames.push(cleanName);
+                    apDeviceCounts.push(deviceCount);
+                }
+            });
+            
+            if (apDeviceCounts.length === 0) {
+                // No devices to show
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No devices', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            const colors = generateColorsBasedOnDeviceCount(apDeviceCounts);
+            
+            try {
+                new Chart(canvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: apNames,
+                        datasets: [{
+                            data: apDeviceCounts,
+                            backgroundColor: colors,
+                            borderWidth: 1,
+                            borderColor: 'var(--color-surface-tertiary)'
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        plugins: {
+                            legend: {
+                                display: false // Hide legend to save space
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} devices (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%' // Make it a donut
+                    }
+                });
+            } catch (error) {
+                console.error(`Error creating chart for ${chartId}:`, error);
+            }
+        }
+        
+
+        
+        function updateChartData(chart, newData, newLabels = null) {
+            if (!chart || !chart.data) return;
+            
+            try {
+                // Prevent any layout changes during update
+                const container = chart.canvas.parentElement;
+                if (container) {
+                    container.style.height = container.offsetHeight + 'px';
+                }
+                
+                // Update data without triggering layout changes
+                if (newLabels && Array.isArray(newLabels)) {
+                    chart.data.labels = newLabels;
+                }
+                
+                if (Array.isArray(newData) && chart.data.datasets[0]) {
+                    chart.data.datasets[0].data = newData;
+                } else if (newData && chart.data.datasets[0]) {
+                    chart.data.datasets[0].data = newData;
+                }
+                
+                // Update without any animation or layout changes
+                chart.update('none');
+                
+                // Restore container height
+                if (container) {
+                    container.style.height = '';
+                }
+            } catch (error) {
+                console.error("Chart update error:", error);
+            }
+        }
+        
+        function updateTextContent(elementId, text) {
+            try {
+                const element = document.getElementById(elementId);
+                if (element && element.textContent !== text) {
+                    // Prevent layout shift by maintaining element dimensions
+                    const originalHeight = element.offsetHeight;
+                    element.textContent = text;
+                    if (element.offsetHeight !== originalHeight) {
+                        element.style.height = originalHeight + 'px';
+                    }
+                }
+            } catch (error) {
+                console.error("Text update error:", error);
+            }
+        }
+        
+        async function updateDashboardData() {
+            try {
+                // Ensure charts are initialized before updating data
+                if (!chartInitialized) {
+                    console.log("Charts not initialized, attempting to initialize...");
+                    if (!initCharts()) {
+                        console.error("Failed to initialize charts, retrying in 2 seconds...");
+                        setTimeout(updateDashboardData, 2000);
+                        return;
+                    }
+                }
+                
+                // Always fetch fresh data and apply filtering client-side for better reliability
+                const response = await fetch('/api/dashboard');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Validate data structure
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Invalid data structure received');
+                }
+                
+                // Reset retry counter on successful data fetch
+                dataLoadRetries = 0;
+                
+                // Check if we have data (indicates configuration is working)
+                if (data.connected_users && data.connected_users.length > 0) {
+                    isConfigured = true;
+                    document.getElementById("setupNotice").style.display = "none";
+                } else if (!isConfigured) {
+                    document.getElementById("setupNotice").style.display = "block";
+                }
+                
+                // Check for stale data (no successful update in last 5 minutes)
+                const lastSuccessful = data.last_successful_update ? new Date(data.last_successful_update) : null;
+                const now = new Date();
+                const isStale = lastSuccessful && (now - lastSuccessful) > 5 * 60 * 1000;
+                
+                if (isStale) {
+                    document.getElementById("lastUpdate").textContent = "⚠️ Data may be stale";
+                    document.getElementById("lastUpdate").style.color = "#ff922b";
+                } else {
+                    document.getElementById("lastUpdate").style.color = "var(--color-text-primary)";
+                }
+                
+                // Apply client-side time filtering
+                const filteredData = filterDataByTimeRange(data, currentTimeRange);
+                
+                // Safely update charts with error handling
+                try {
+                    // Update Connected Users Chart
+                    if (charts.users && filteredData.connected_users) {
+                        const labels = filteredData.connected_users.map(entry => 
+                            new Date(entry.timestamp).toLocaleTimeString()
+                        );
+                        const data = filteredData.connected_users.map(entry => Math.round(entry.count));
+                        updateChartData(charts.users, data, labels);
+                    }
+                } catch (error) {
+                    console.error("Error updating users chart:", error);
+                }
+                
+                try {
+                    // Update Device OS Chart (use current data, not time-filtered)
+                    if (charts.deviceOS && data.device_os) {
+                        const deviceOS = data.device_os || {};
+                        const deviceCounts = [
+                            Math.round(deviceOS.iOS || 0),
+                            Math.round(deviceOS.Android || 0),
+                            Math.round(deviceOS.Windows || 0),
+                            Math.round(deviceOS.Amazon || 0),
+                            Math.round(deviceOS.Gaming || 0),
+                            Math.round(deviceOS.Streaming || 0),
+                            Math.round(deviceOS.Other || 0)
+                        ];
+                        updateChartData(charts.deviceOS, deviceCounts);
+                        
+                        const totalDevices = deviceCounts.reduce((a, b) => a + b, 0);
+                        const wirelessCount = data.wireless_devices || 0;
+                        const wiredCount = data.wired_devices || 0;
+                        const networksCount = data.active_networks || 1;
+                        updateTextContent("deviceOsSubtitle", `${totalDevices} devices (${wirelessCount} wireless, ${wiredCount} wired) from ${networksCount} network${networksCount > 1 ? 's' : ''}`);
+                    }
+                } catch (error) {
+                    console.error("Error updating device OS chart:", error);
+                }
+                
+                try {
+                    // Update Frequency Chart (wireless devices only)
+                    if (charts.frequency && data.frequency_distribution) {
+                        const freqDist = data.frequency_distribution || {};
+                        const freqCounts = [
+                            Math.round(freqDist["2.4GHz"] || 0),
+                            Math.round(freqDist["5GHz"] || 0),
+                            Math.round(freqDist["6GHz"] || 0)
+                        ];
+                        updateChartData(charts.frequency, freqCounts);
+                        
+                        const totalFreqDevices = freqCounts.reduce((a, b) => a + b, 0);
+                        updateTextContent("frequencySubtitle", `${totalFreqDevices} wireless devices`);
+                    }
+                } catch (error) {
+                    console.error("Error updating frequency chart:", error);
+                }
+                
+                try {
+                    // Update Network Info Display (replaces signal strength chart)
+                    updateNetworkInfoDisplay();
+                } catch (error) {
+                    console.error("Error updating network info display:", error);
+                }
+                
+                // Update last update time
+                const lastUpdate = new Date(data.last_update);
+                const timeDiff = Math.floor((now - lastUpdate) / 1000);
+                
+                let updateText;
+                if (timeDiff < 60) {
+                    updateText = `Updated: ${timeDiff}s ago`;
+                } else if (timeDiff < 3600) {
+                    updateText = `Updated: ${Math.floor(timeDiff / 60)}m ago`;
+                } else {
+                    updateText = `Updated: ${lastUpdate.toLocaleTimeString()}`;
+                }
+                
+                if (isStale) {
+                    updateText = "⚠️ Data may be stale";
+                }
+                
+                updateTextContent("lastUpdate", updateText);
+                
+                // Update network information display
+                updateNetworkInfoDisplay();
+                
+                // Don't update AP visualization here - only when AP page is accessed
+                
+                // Debug signal data (can be removed later)
+                if (Math.random() < 0.1) { // Only 10% of the time to avoid spam
+                    await debugSignalData();
+                }
+                    
+            } catch (error) {
+                console.error("Dashboard update error:", error);
+                dataLoadRetries++;
+                
+                if (dataLoadRetries <= MAX_RETRIES) {
+                    console.log(`Retrying data load (attempt ${dataLoadRetries}/${MAX_RETRIES}) in 3 seconds...`);
+                    document.getElementById("lastUpdate").textContent = `Retry ${dataLoadRetries}/${MAX_RETRIES}...`;
+                    setTimeout(updateDashboardData, 3000);
+                } else {
+                    document.getElementById("lastUpdate").textContent = "Update failed";
+                    document.getElementById("lastUpdate").style.color = "#ff6b6b";
+                    // Reset retry counter after max attempts
+                    setTimeout(() => { dataLoadRetries = 0; }, 30000);
+                }
+            }
+        }
+        
+        function filterDataByTimeRange(data, hours) {
+            if (!hours || hours === 0) {
+                return data;
+            }
+            
+            const cutoffTime = new Date(Date.now() - (hours * 60 * 60 * 1000));
+            
+            return {
+                ...data,
+                connected_users: data.connected_users.filter(entry => 
+                    new Date(entry.timestamp) >= cutoffTime
+                ),
+                signal_strength_avg: data.signal_strength_avg.filter(entry => 
+                    new Date(entry.timestamp) >= cutoffTime
+                )
+            };
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add("active");
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove("active");
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains("modal")) {
+                event.target.classList.remove("active");
+            }
+        }
+        
+        async function showDevices() {
+            try {
+                const response = await fetch("/api/devices");
+                const data = await response.json();
+                const container = document.getElementById("devicesList");
+                
+                if (!data.devices || data.devices.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--color-text-secondary);">No devices found</p>';
+                } else {
+                    container.innerHTML = data.devices.map(device => `
+                        <div class="device-item">
+                            <div class="device-name">${device.name} ${device.connection_type === 'Wired' ? '<span style="color: #51cf66; font-size: 12px;">[Wired]</span>' : '<span style="color: #4da6ff; font-size: 12px;">[Wireless]</span>'}</div>
+                            <div class="device-info">
+                                <div class="device-info-item">
+                                    <span class="device-label">IP:</span>
+                                    <span class="device-value">${device.ip}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">MAC:</span>
+                                    <span class="device-value">${device.mac}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">Manufacturer:</span>
+                                    <span class="device-value">${device.manufacturer}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">Type:</span>
+                                    <span class="device-value">${device.device_os}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">Connection:</span>
+                                    <span class="device-value">${device.connection_type}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">Frequency:</span>
+                                    <span class="device-value">${device.frequency}</span>
+                                </div>
+                                <div class="device-info-item">
+                                    <span class="device-label">Signal:</span>
+                                    <span class="device-value">${device.signal_quality} ${device.connection_type === 'Wireless' ? '(' + device.signal_avg_dbm + ')' : ''}</span>
+                                </div>
+                            </div>
+                            ${device.connection_type === 'Wireless' ? `<div class="signal-bar"><div class="signal-fill" style="width: ${device.signal_avg}%"></div></div>` : '<div style="text-align: center; color: #51cf66; font-size: 12px; margin-top: 8px;">Wired Connection</div>'}
+                        </div>
+                    `).join("");
+                }
+                
+                openModal("devicesModal");
+            } catch (error) {
+                console.error("Error loading devices:", error);
+            }
+        }
+        
+        async function showAdmin() {
+            await loadAdminInfo();
+            openModal("adminModal");
+        }
+        
+        async function loadAdminInfo() {
+            try {
+                const response = await fetch("/api/version");
+                const data = await response.json();
+                
+                const networkId = data.network_id || 'Not configured';
+                const networkIdDisplay = networkId !== 'Not configured' 
+                    ? `<a href="https://insight.eero.com/networks/${networkId}" target="_blank" style="color: #4da6ff; text-decoration: none;">${networkId} <i class="fas fa-external-link-alt" style="font-size: 10px;"></i></a>`
+                    : networkId;
+                
+                document.getElementById("adminInfo").innerHTML = `
+                    <div class="admin-info-item">
+                        <span>Version:</span>
+                        <span>${data.version}</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>Networks:</span>
+                        <span>${data.networks_count || 1} configured</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>Primary Network:</span>
+                        <span>${networkIdDisplay}</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>Environment:</span>
+                        <span>${data.environment}</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>API URL:</span>
+                        <span>${data.api_url}</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>Timezone:</span>
+                        <span>${data.timezone || 'UTC'}</span>
+                    </div>
+                    <div class="admin-info-item">
+                        <span>Local Time:</span>
+                        <span>${data.local_time || 'Unknown'}</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error loading admin info:", error);
+            }
+        }
+        
+        function showAlert(message, type = "info") {
+            const alertsContainer = document.getElementById("adminAlerts");
+            alertsContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertsContainer.innerHTML = "";
+            }, 5000);
+        }
+        
+        async function updateDashboard() {
+            try {
+                // Save current data before updating
+                console.log("Saving current data before update...");
+                await fetch("/api/admin/backup-data", { method: "POST" });
+                
+                const response = await fetch("/api/admin/update", { method: "POST" });
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    setTimeout(() => location.reload(), 3000);
+                }
+            } catch (error) {
+                showAlert("Failed to update dashboard", "error");
+            }
+        }
+        
+        function showNetworkIdForm() {
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">New Network ID:</label>
+                    <input type="text" id="newNetworkId" class="form-input" placeholder="Enter network ID">
+                    <button class="form-btn" style="margin-top:10px" onclick="changeNetworkId()">
+                        Update Network ID
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function changeNetworkId() {
+            const newId = document.getElementById("newNetworkId").value.trim();
+            
+            if (!newId || !newId.match(/^\d+$/)) {
+                showAlert("Invalid network ID", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/admin/network-id", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ network_id: newId })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    document.getElementById("adminFormContainer").innerHTML = "";
+                    setTimeout(() => location.reload(), 2000);
+                }
+            } catch (error) {
+                showAlert("Failed to update network ID", "error");
+            }
+        }
+        
+        function showTimezoneForm() {
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Timezone:</label>
+                    <select id="newTimezone" class="form-input">
+                        <option value="UTC">UTC</option>
+                        <option value="US/Eastern">US/Eastern (EST/EDT)</option>
+                        <option value="US/Central">US/Central (CST/CDT)</option>
+                        <option value="US/Mountain">US/Mountain (MST/MDT)</option>
+                        <option value="US/Pacific">US/Pacific (PST/PDT)</option>
+                        <option value="Europe/London">Europe/London (GMT/BST)</option>
+                        <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                        <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                    </select>
+                    <button class="form-btn" style="margin-top:10px" onclick="changeTimezone()">
+                        Update Timezone
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function changeTimezone() {
+            const newTimezone = document.getElementById("newTimezone").value;
+            
+            try {
+                const response = await fetch("/api/admin/timezone", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ timezone: newTimezone })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    document.getElementById("adminFormContainer").innerHTML = "";
+                    setTimeout(() => {
+                        loadAdminInfo(); // Refresh admin info to show new timezone
+                    }, 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to update timezone", "error");
+            }
+        }
+        
+        async function showNetworksManager() {
+            try {
+                const response = await fetch("/api/networks");
+                const data = await response.json();
+                const networks = data.networks || [];
+                
+                let networksHtml = `
+                    <div class="form-group">
+                        <label class="form-label">Configured Networks (${networks.length}/6):</label>
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid rgba(77,166,255,.3); border-radius: 8px; padding: 10px; margin: 10px 0;">
+                `;
+                
+                if (networks.length === 0) {
+                    networksHtml += '<p style="text-align: center; color: var(--color-text-secondary);">No networks configured</p>';
+                } else {
+                    networks.forEach((network, index) => {
+                        const statusColor = network.authenticated ? '#51cf66' : '#ff6b6b';
+                        const statusText = network.authenticated ? 'Authenticated' : 'Not Authenticated';
+                        const activeText = network.active ? 'Active' : 'Inactive';
+                        const activeColor = network.active ? '#4da6ff' : '#868e96';
+                        
+                        networksHtml += `
+                            <div style="background: rgba(0,40,80,.5); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(77,166,255,.2);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                            <span id="network-name-display-${network.id}" style="color: var(--color-primary); font-weight: 600; font-size: 16px;">${network.name}</span>
+                                            <button onclick="startAdminNetworkRename('${network.id}')" style="background: none; border: none; color: #4da6ff; cursor: pointer; padding: 2px 4px; border-radius: 3px; font-size: 12px;" title="Rename network">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                        <div id="network-rename-form-${network.id}" style="display: none; margin-bottom: 5px;">
+                                            <div style="display: flex; gap: 5px; align-items: center;">
+                                                <input type="text" id="network-rename-input-${network.id}" value="${network.name}" maxlength="50" style="flex: 1; padding: 4px 8px; border: 1px solid #4da6ff; border-radius: 4px; background: rgba(255,255,255,0.9); color: #1a202c; font-size: 14px;">
+                                                <button onclick="saveAdminNetworkRename('${network.id}')" style="background: #51cf66; border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button onclick="cancelAdminNetworkRename('${network.id}')" style="background: #ff6b6b; border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 12px; color: var(--color-text-secondary);">ID: ${network.id} | Email: ${network.email}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="color: ${statusColor}; font-size: 12px; font-weight: 500;">${statusText}</div>
+                                        <div style="color: ${activeColor}; font-size: 12px;">${activeText}</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                    ${!network.authenticated ? `<button class="form-btn" style="padding: 4px 8px; font-size: 11px;" onclick="authenticateNetwork('${network.id}')">Authenticate with Email</button>` : ''}
+                                    <button class="form-btn" style="padding: 4px 8px; font-size: 11px; background: ${network.active ? '#868e96' : '#4da6ff'};" onclick="toggleNetwork('${network.id}')">${network.active ? 'Disable' : 'Enable'}</button>
+                                    <button class="form-btn" style="padding: 4px 8px; font-size: 11px; background: #ff6b6b;" onclick="removeNetwork('${network.id}')">Remove</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                networksHtml += `
+                        </div>
+                        ${networks.length < 6 ? `
+                            <button class="form-btn" onclick="showAddNetworkForm()" style="margin-top: 10px;">
+                                <i class="fas fa-plus"></i> Add New Network
+                            </button>
+                        ` : '<p style="color: #ff922b; font-size: 12px; margin-top: 10px;">Maximum 6 networks reached</p>'}
+                    </div>
+                `;
+                
+                document.getElementById("adminFormContainer").innerHTML = networksHtml;
+            } catch (error) {
+                showAlert("Failed to load networks", "error");
+            }
+        }
+        
+        // Admin panel network rename functions
+        function startAdminNetworkRename(networkId) {
+            const nameDisplay = document.getElementById(`network-name-display-${networkId}`);
+            const renameForm = document.getElementById(`network-rename-form-${networkId}`);
+            const renameInput = document.getElementById(`network-rename-input-${networkId}`);
+            
+            if (nameDisplay && renameForm && renameInput) {
+                nameDisplay.style.display = 'none';
+                renameForm.style.display = 'block';
+                renameInput.focus();
+                renameInput.select();
+            }
+        }
+        
+        function cancelAdminNetworkRename(networkId) {
+            const nameDisplay = document.getElementById(`network-name-display-${networkId}`);
+            const renameForm = document.getElementById(`network-rename-form-${networkId}`);
+            
+            if (nameDisplay && renameForm) {
+                nameDisplay.style.display = 'inline';
+                renameForm.style.display = 'none';
+            }
+        }
+        
+        async function saveAdminNetworkRename(networkId) {
+            const renameInput = document.getElementById(`network-rename-input-${networkId}`);
+            const newName = renameInput.value.trim();
+            
+            if (!newName) {
+                showAlert('Network name cannot be empty', 'error');
+                return;
+            }
+            
+            if (newName.length > 50) {
+                showAlert('Network name too long (max 50 characters)', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/networks/${networkId}/rename`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: newName })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the display
+                    const nameDisplay = document.getElementById(`network-name-display-${networkId}`);
+                    if (nameDisplay) {
+                        nameDisplay.textContent = newName;
+                    }
+                    
+                    // Hide the form
+                    cancelAdminNetworkRename(networkId);
+                    
+                    // Show success message
+                    showAlert('Network renamed successfully!', 'success');
+                    
+                    // Refresh the main dashboard network info
+                    setTimeout(() => {
+                        updateNetworkInfoDisplay();
+                    }, 500);
+                } else {
+                    showAlert('Error renaming network: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error renaming network:', error);
+                showAlert('Error renaming network. Please try again.', 'error');
+            }
+        }
+        
+        // Add keyboard support for admin rename input
+        document.addEventListener('keydown', function(event) {
+            if (event.target.id && event.target.id.startsWith('network-rename-input-')) {
+                if (event.key === 'Enter') {
+                    const networkId = event.target.id.replace('network-rename-input-', '');
+                    saveAdminNetworkRename(networkId);
+                } else if (event.key === 'Escape') {
+                    const networkId = event.target.id.replace('network-rename-input-', '');
+                    cancelAdminNetworkRename(networkId);
+                }
+            }
+        });
+        
+        function showAddNetworkForm() {
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Add New Network:</label>
+                    <input type="text" id="newNetworkId" class="form-input" placeholder="Network ID (numbers only)" style="margin-bottom: 10px;">
+                    <input type="email" id="newNetworkEmail" class="form-input" placeholder="Email for authentication" style="margin-bottom: 10px;">
+                    <input type="text" id="newNetworkName" class="form-input" placeholder="Network name (optional)" style="margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="form-btn" onclick="addNetwork()">Add Network</button>
+                        <button class="form-btn" style="background: #868e96;" onclick="showNetworksManager()">Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function addNetwork() {
+            const networkId = document.getElementById("newNetworkId").value.trim();
+            const email = document.getElementById("newNetworkEmail").value.trim();
+            const name = document.getElementById("newNetworkName").value.trim() || `Network ${networkId}`;
+            
+            if (!networkId || !networkId.match(/^\d+$/)) {
+                showAlert("Invalid network ID", "error");
+                return;
+            }
+            
+            if (!email || !email.includes("@")) {
+                showAlert("Invalid email address", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/admin/networks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ network_id: networkId, email: email, name: name })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    setTimeout(() => showNetworksManager(), 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to add network", "error");
+            }
+        }
+        
+        async function removeNetwork(networkId) {
+            if (!confirm(`Are you sure you want to remove network ${networkId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/networks/${networkId}`, {
+                    method: "DELETE"
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    setTimeout(() => showNetworksManager(), 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to remove network", "error");
+            }
+        }
+        
+        async function toggleNetwork(networkId) {
+            try {
+                const response = await fetch(`/api/admin/networks/${networkId}/toggle`, {
+                    method: "POST"
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    setTimeout(() => showNetworksManager(), 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to toggle network", "error");
+            }
+        }
+        
+        async function authenticateNetwork(networkId) {
+            // Show email input form first
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Authenticate Network ${networkId}:</label>
+                            <p style="color: var(--color-text-secondary); font-size: 12px; margin-bottom: 15px;">
+                        Enter the email address to receive the verification code for this network.
+                    </p>
+                    <input type="email" id="authEmail" class="form-input" placeholder="Enter email address" style="margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="form-btn" onclick="sendNetworkAuthCode('${networkId}')">Send Code</button>
+                        <button class="form-btn" style="background: #868e96;" onclick="showNetworksManager()">Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function sendNetworkAuthCode(networkId) {
+            const email = document.getElementById("authEmail").value.trim();
+            
+            if (!email || !email.includes("@")) {
+                showAlert("Valid email address required", "error");
+                return;
+            }
+            
+            try {
+                // Send authentication code with email
+                const response = await fetch(`/api/admin/networks/${networkId}/auth`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ step: "send", email: email })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    // Show verification form
+                    document.getElementById("adminFormContainer").innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Authenticate Network ${networkId}:</label>
+                            <p style="color: rgba(255,255,255,.7); font-size: 12px; margin-bottom: 15px;">
+                                A verification code has been sent to <strong>${email}</strong>.
+                            </p>
+                            <input type="text" id="authCode" class="form-input" placeholder="Enter verification code" style="margin-bottom: 10px;">
+                            <div style="display: flex; gap: 10px;">
+                                <button class="form-btn" onclick="verifyNetworkAuth('${networkId}')">Verify Code</button>
+                                <button class="form-btn" style="background: #868e96;" onclick="showNetworksManager()">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showAlert("Failed to send authentication code", "error");
+            }
+        }
+        
+        async function verifyNetworkAuth(networkId) {
+            const code = document.getElementById("authCode").value.trim();
+            
+            if (!code) {
+                showAlert("Verification code required", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/networks/${networkId}/auth`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ step: "verify", code: code })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    setTimeout(() => showNetworksManager(), 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to verify code", "error");
+            }
+        }
+        
+        function showKioskSettingsForm() {
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Kiosk Mode Settings</label>
+                    <div style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 5px;">Dashboard Display Time (seconds)</label>
+                        <input type="number" id="kioskDashboardTime" class="form-input" value="${kioskDashboardTime / 1000}" min="1" max="60" step="1">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 5px;">Capacity Display Time (seconds)</label>
+                        <input type="number" id="kioskCapacityTime" class="form-input" value="${kioskCapacityTime / 1000}" min="1" max="60" step="1">
+                    </div>
+                    <button class="form-btn" onclick="saveKioskSettings()">Save Kiosk Settings</button>
+                    <div style="margin-top: 10px; font-size: 12px; color: var(--color-text-secondary);">
+                        <p><strong>Dashboard Time:</strong> How long to show the main dashboard</p>
+                        <p><strong>Capacity Time:</strong> How long to show the AP capacity view</p>
+                        <p><strong>Note:</strong> Changes take effect immediately in kiosk mode</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function saveKioskSettings() {
+            const dashboardTime = parseInt(document.getElementById("kioskDashboardTime").value) * 1000;
+            const capacityTime = parseInt(document.getElementById("kioskCapacityTime").value) * 1000;
+            
+            if (dashboardTime < 1000 || dashboardTime > 60000) {
+                alert("Dashboard time must be between 1 and 60 seconds");
+                return;
+            }
+            
+            if (capacityTime < 1000 || capacityTime > 60000) {
+                alert("Capacity time must be between 1 and 60 seconds");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/admin/kiosk-settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        dashboard_time: dashboardTime,
+                        capacity_time: capacityTime
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Update local variables
+                    kioskDashboardTime = dashboardTime;
+                    kioskCapacityTime = capacityTime;
+                    
+                    document.getElementById("adminAlerts").innerHTML = 
+                        '<div class="alert alert-success">Kiosk settings saved successfully!</div>';
+                    
+                    // Clear form
+                    document.getElementById("adminFormContainer").innerHTML = "";
+                    
+                    // Clear alert after 3 seconds
+                    setTimeout(() => {
+                        document.getElementById("adminAlerts").innerHTML = "";
+                    }, 3000);
+                } else {
+                    document.getElementById("adminAlerts").innerHTML = 
+                        '<div class="alert alert-error">Error: ' + data.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById("adminAlerts").innerHTML = 
+                    '<div class="alert alert-error">Network error. Please try again.</div>';
+            }
+        }
+        
+        function showReauthorizeForm() {
+            document.getElementById("adminFormContainer").innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Email:</label>
+                    <input type="email" id="authEmail" class="form-input" placeholder="Enter email">
+                    <button class="form-btn" style="margin-top:10px" onclick="sendAuthCode()">
+                        Send Code
+                    </button>
+                </div>
+                <div id="codeFormContainer"></div>
+            `;
+        }
+        
+        async function sendAuthCode() {
+            const email = document.getElementById("authEmail").value.trim();
+            
+            if (!email || !email.includes("@")) {
+                showAlert("Invalid email", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/admin/reauthorize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ step: "send", email })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    document.getElementById("codeFormContainer").innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Verification Code:</label>
+                            <input type="text" id="authCode" class="form-input" placeholder="Enter code from email">
+                            <button class="form-btn" style="margin-top:10px" onclick="verifyAuthCode()">
+                                Verify
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showAlert("Failed to send code", "error");
+            }
+        }
+        
+        async function verifyAuthCode() {
+            const code = document.getElementById("authCode").value.trim();
+            
+            if (!code) {
+                showAlert("Code required", "error");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/admin/reauthorize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ step: "verify", code })
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? "success" : "error");
+                
+                if (data.success) {
+                    document.getElementById("adminFormContainer").innerHTML = "";
+                    document.getElementById("codeFormContainer").innerHTML = "";
+                    // Reload network name after successful authentication
+                    setTimeout(loadNetworkName, 1000);
+                }
+            } catch (error) {
+                showAlert("Failed to verify code", "error");
+            }
+        }
+        
+        // Initialize everything when page loads
+        window.addEventListener("load", () => {
+            console.log("Page loaded, initializing dashboard...");
+            
+            // Load kiosk settings
+            loadKioskSettings();
+            
+            // Pre-load AP data for seamless transitions
+            setTimeout(() => {
+                preloadAPData();
+            }, 2000); // Wait 2 seconds after page load to avoid interfering with initial setup
+            
+            // Initialize charts first
+            if (initCharts()) {
+                console.log("Charts initialized successfully");
+                
+                // Load network name
+                loadNetworkName();
+                
+                // Initial data update
+                updateDashboardData();
+                
+                // Set up intervals
+                setInterval(updateDashboardData, 60000); // Update every minute
+                setInterval(loadNetworkName, 300000); // Update network name every 5 minutes
+            } else {
+                console.error("Failed to initialize charts, retrying in 2 seconds...");
+                setTimeout(() => {
+                    if (initCharts()) {
+                        loadNetworkName();
+                        updateDashboardData();
+                        setInterval(updateDashboardData, 60000);
+                        setInterval(loadNetworkName, 300000);
+                    }
+                }, 2000);
+            }
+        });
+        
+        // Also try to initialize on DOMContentLoaded as backup
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM content loaded");
+            // Small delay to ensure all elements are rendered
+            setTimeout(() => {
+                if (!chartInitialized) {
+                    console.log("Charts not yet initialized, attempting...");
+                    initCharts();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
