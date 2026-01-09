@@ -1307,6 +1307,368 @@ def update_network_binding():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/admin/interface-access', methods=['GET'])
+def get_interface_access():
+    """Get interface access configuration"""
+    try:
+        config = load_config()
+        interface_access = config.get('interface_access', {
+            'wired_enabled': True,
+            'wireless_enabled': True,
+            'allow_external': True
+        })
+        
+        return jsonify({
+            'success': True,
+            'interface_access': interface_access
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/interface-access', methods=['POST'])
+def update_interface_access():
+    """Update interface access configuration"""
+    try:
+        data = request.get_json()
+        wired_enabled = data.get('wired_enabled', True)
+        wireless_enabled = data.get('wireless_enabled', True)
+        allow_external = data.get('allow_external', True)
+        
+        config = load_config()
+        config['interface_access'] = {
+            'wired_enabled': wired_enabled,
+            'wireless_enabled': wireless_enabled,
+            'allow_external': allow_external
+        }
+        
+        if save_config(config):
+            # Update nginx configuration based on settings
+            update_nginx_interface_config(wired_enabled, wireless_enabled, allow_external)
+            
+            return jsonify({
+                'success': True, 
+                'message': 'Interface access updated. Changes applied to web server.'
+            })
+        
+        return jsonify({'success': False, 'message': 'Failed to save configuration'}), 500
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/boot-notification', methods=['GET'])
+def get_boot_notification():
+    """Get boot notification configuration"""
+    try:
+        config = load_config()
+        boot_notification = config.get('boot_notification', {
+            'enabled': True,
+            'email': 'drew@drewlentz.com',
+            'smtp_server': 'smtp.gmail.com',
+            'smtp_port': 587,
+            'smtp_username': '',
+            'smtp_password': ''
+        })
+        
+        # Don't return password in response
+        boot_notification_safe = boot_notification.copy()
+        if 'smtp_password' in boot_notification_safe:
+            boot_notification_safe['smtp_password'] = '***' if boot_notification_safe['smtp_password'] else ''
+        
+        return jsonify({
+            'success': True,
+            'boot_notification': boot_notification_safe
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/boot-notification', methods=['POST'])
+def update_boot_notification():
+    """Update boot notification configuration"""
+    try:
+        data = request.get_json()
+        
+        config = load_config()
+        current_config = config.get('boot_notification', {})
+        
+        # Update configuration
+        boot_notification = {
+            'enabled': data.get('enabled', True),
+            'email': data.get('email', 'drew@drewlentz.com'),
+            'smtp_server': data.get('smtp_server', 'smtp.gmail.com'),
+            'smtp_port': data.get('smtp_port', 587),
+            'smtp_username': data.get('smtp_username', ''),
+            'smtp_password': data.get('smtp_password', current_config.get('smtp_password', ''))
+        }
+        
+        # If password is '***', keep the existing password
+        if boot_notification['smtp_password'] == '***':
+            boot_notification['smtp_password'] = current_config.get('smtp_password', '')
+        
+        config['boot_notification'] = boot_notification
+        
+        if save_config(config):
+            return jsonify({
+                'success': True, 
+                'message': 'Boot notification settings updated.'
+            })
+        
+        return jsonify({'success': False, 'message': 'Failed to save configuration'}), 500
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/test-boot-notification', methods=['POST'])
+def test_boot_notification():
+    """Test boot notification email"""
+    try:
+        send_boot_notification(test_mode=True)
+        return jsonify({'success': True, 'message': 'Test notification sent successfully!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to send test notification: {str(e)}'}), 500
+
+def update_nginx_interface_config(wired_enabled, wireless_enabled, allow_external):
+    """Update nginx configuration based on interface access settings"""
+    try:
+        import subprocess
+        
+        # Get interface information
+        wired_ips = []
+        wireless_ips = []
+        
+        # Get wired interface IPs
+        if wired_enabled:
+            result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+            for line in result.stdout.split('\n'):
+                if 'eth' in line or 'enp' in line:
+                    # Found wired interface, get its IP
+                    interface_lines = result.stdout.split(line)[1].split('\n')
+                    for iface_line in interface_lines:
+                        if 'inet ' in iface_line and '127.0.0.1' not in iface_line:
+                            ip_addr = iface_line.strip().split()[1].split('/')[0]
+                            wired_ips.append(ip_addr)
+                            break
+                    break
+        
+        # Get wireless interface IPs
+        if wireless_enabled:
+            result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+            for line in result.stdout.split('\n'):
+                if 'wlan' in line or 'wlp' in line:
+                    # Found wireless interface, get its IP
+                    interface_lines = result.stdout.split(line)[1].split('\n')
+                    for iface_line in interface_lines:
+                        if 'inet ' in iface_line and '127.0.0.1' not in iface_line:
+                            ip_addr = iface_line.strip().split()[1].split('/')[0]
+                            wireless_ips.append(ip_addr)
+                            break
+                    break
+        
+        # Create nginx configuration
+        allowed_ips = []
+        if wired_enabled:
+            allowed_ips.extend(wired_ips)
+        if wireless_enabled:
+            allowed_ips.extend(wireless_ips)
+        
+        if allow_external:
+            allowed_ips.append('0.0.0.0/0')  # Allow all external IPs
+        
+        # Generate nginx config with IP restrictions
+        nginx_config = f"""# HTTP redirect to HTTPS
+server {{
+    listen 80;
+    server_name _;
+    
+    # IP Access Control
+"""
+        
+        if not allow_external and allowed_ips:
+            for ip in allowed_ips:
+                if ip != '0.0.0.0/0':
+                    nginx_config += f"    allow {ip};\n"
+            nginx_config += "    deny all;\n"
+        
+        nginx_config += """    
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl http2;
+    server_name _;
+    
+    # IP Access Control
+"""
+        
+        if not allow_external and allowed_ips:
+            for ip in allowed_ips:
+                if ip != '0.0.0.0/0':
+                    nginx_config += f"    allow {ip};\n"
+            nginx_config += "    deny all;\n"
+        
+        nginx_config += """    
+    # SSL Configuration
+    ssl_certificate /home/wifi/eero-dashboard/ssl/dashboard.crt;
+    ssl_certificate_key /home/wifi/eero-dashboard/ssl/dashboard.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    
+    # Proxy to dashboard
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Port 443;
+        
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}"""
+        
+        # Write nginx configuration
+        with open('/tmp/eero-dashboard-https', 'w') as f:
+            f.write(nginx_config)
+        
+        # Update nginx configuration
+        subprocess.run(['sudo', 'cp', '/tmp/eero-dashboard-https', '/etc/nginx/sites-available/eero-dashboard-https'], check=True)
+        subprocess.run(['sudo', 'nginx', '-t'], check=True)
+        subprocess.run(['sudo', 'systemctl', 'reload', 'nginx'], check=True)
+        
+        logging.info(f"Nginx configuration updated - Wired: {wired_enabled}, Wireless: {wireless_enabled}, External: {allow_external}")
+        
+    except Exception as e:
+        logging.error(f"Failed to update nginx configuration: {str(e)}")
+        raise
+
+def send_boot_notification(test_mode=False):
+    """Send boot notification email with IP addresses"""
+    try:
+        config = load_config()
+        boot_config = config.get('boot_notification', {})
+        
+        if not boot_config.get('enabled', True) and not test_mode:
+            return
+        
+        import smtplib
+        import subprocess
+        from email.mime.text import MimeText
+        from email.mime.multipart import MimeMultipart
+        from datetime import datetime
+        
+        # Get network interface information
+        result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+        
+        interfaces = {}
+        current_interface = None
+        
+        for line in result.stdout.split('\n'):
+            if line and not line.startswith(' '):
+                # New interface
+                parts = line.split(':')
+                if len(parts) >= 2:
+                    interface_name = parts[1].strip()
+                    if interface_name not in ['lo']:  # Skip loopback
+                        current_interface = interface_name
+                        interfaces[interface_name] = {
+                            'type': 'wired' if interface_name.startswith(('eth', 'enp')) else 'wireless' if interface_name.startswith(('wlan', 'wlp')) else 'other',
+                            'addresses': []
+                        }
+            elif current_interface and 'inet ' in line:
+                # IP address
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    ip_addr = parts[1].split('/')[0]
+                    interfaces[current_interface]['addresses'].append(ip_addr)
+        
+        # Get hostname
+        hostname = subprocess.run(['hostname'], capture_output=True, text=True).stdout.strip()
+        
+        # Create email content
+        subject = f"{'[TEST] ' if test_mode else ''}Eero Dashboard Boot Notification - {hostname}"
+        
+        body = f"""
+Eero Dashboard Boot Notification
+{'='*40}
+
+Hostname: {hostname}
+Boot Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S %Z')}
+Dashboard Version: {VERSION}
+
+Network Interfaces:
+"""
+        
+        for interface, info in interfaces.items():
+            if info['addresses']:
+                body += f"\n{interface} ({info['type']}):\n"
+                for addr in info['addresses']:
+                    body += f"  - {addr}\n"
+        
+        body += f"""
+Dashboard Access:
+- HTTPS: https://{interfaces.get('wlan0', {}).get('addresses', ['N/A'])[0] if 'wlan0' in interfaces else 'N/A'}
+- HTTP:  Redirects to HTTPS
+
+Voice API Endpoints:
+- /api/voice/status
+- /api/voice/devices  
+- /api/voice/aps
+- /api/voice/events
+
+Status: {'Test notification' if test_mode else 'Dashboard started successfully'}
+
+This is an automated notification from your Eero Dashboard.
+"""
+        
+        # Create message
+        msg = MimeMultipart()
+        msg['From'] = boot_config.get('smtp_username', 'eero-dashboard@localhost')
+        msg['To'] = boot_config.get('email', 'drew@drewlentz.com')
+        msg['Subject'] = subject
+        
+        msg.attach(MimeText(body, 'plain'))
+        
+        # Send email
+        smtp_server = boot_config.get('smtp_server', 'smtp.gmail.com')
+        smtp_port = boot_config.get('smtp_port', 587)
+        smtp_username = boot_config.get('smtp_username', '')
+        smtp_password = boot_config.get('smtp_password', '')
+        
+        if not smtp_username or not smtp_password:
+            raise Exception("SMTP username and password are required")
+        
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        
+        text = msg.as_string()
+        server.sendmail(msg['From'], msg['To'], text)
+        server.quit()
+        
+        logging.info(f"Boot notification sent to {msg['To']}")
+        
+    except Exception as e:
+        logging.error(f"Failed to send boot notification: {str(e)}")
+        raise
+
 @app.route('/api/network-stats')
 def get_network_stats():
     """Get detailed statistics for each network"""
