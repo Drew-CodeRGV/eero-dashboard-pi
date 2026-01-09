@@ -1152,6 +1152,161 @@ def change_timezone():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/admin/ssl-config', methods=['GET'])
+def get_ssl_config():
+    """Get SSL configuration"""
+    try:
+        ssl_config_file = LOCAL_DIR.parent / "ssl_config.json"
+        
+        if ssl_config_file.exists():
+            with open(ssl_config_file, 'r') as f:
+                ssl_config = json.load(f)
+        else:
+            ssl_config = {
+                'ssl_enabled': False,
+                'ssl_port': 443,
+                'redirect_http': True,
+                'cert_file': '',
+                'key_file': ''
+            }
+        
+        # Check if certificate files exist
+        if ssl_config.get('cert_file') and ssl_config.get('key_file'):
+            cert_exists = Path(ssl_config['cert_file']).exists()
+            key_exists = Path(ssl_config['key_file']).exists()
+            ssl_config['certificates_valid'] = cert_exists and key_exists
+        else:
+            ssl_config['certificates_valid'] = False
+        
+        return jsonify({
+            'success': True,
+            'ssl_config': ssl_config
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/ssl-config', methods=['POST'])
+def update_ssl_config():
+    """Update SSL configuration"""
+    try:
+        data = request.get_json()
+        ssl_enabled = data.get('ssl_enabled', False)
+        ssl_port = data.get('ssl_port', 443)
+        redirect_http = data.get('redirect_http', True)
+        
+        # Validate port
+        if not (1 <= ssl_port <= 65535):
+            return jsonify({'success': False, 'message': 'Invalid SSL port'}), 400
+        
+        ssl_config = {
+            'ssl_enabled': ssl_enabled,
+            'ssl_port': ssl_port,
+            'redirect_http': redirect_http
+        }
+        
+        ssl_config_file = LOCAL_DIR.parent / "ssl_config.json"
+        with open(ssl_config_file, 'w') as f:
+            json.dump(ssl_config, f, indent=2)
+        
+        return jsonify({
+            'success': True, 
+            'message': 'SSL configuration updated. Restart dashboard to apply changes.'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/network-interfaces', methods=['GET'])
+def get_network_interfaces():
+    """Get available network interfaces"""
+    try:
+        import subprocess
+        
+        # Get network interfaces
+        result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+        interfaces = []
+        
+        current_interface = None
+        for line in result.stdout.split('\n'):
+            if line and not line.startswith(' '):
+                # New interface
+                parts = line.split(':')
+                if len(parts) >= 2:
+                    interface_name = parts[1].strip()
+                    if interface_name not in ['lo']:  # Skip loopback
+                        current_interface = {
+                            'name': interface_name,
+                            'type': 'wired' if interface_name.startswith('eth') else 'wireless' if interface_name.startswith('wl') else 'other',
+                            'addresses': []
+                        }
+                        interfaces.append(current_interface)
+            elif current_interface and 'inet ' in line:
+                # IP address
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    ip_addr = parts[1].split('/')[0]
+                    current_interface['addresses'].append(ip_addr)
+        
+        return jsonify({
+            'success': True,
+            'interfaces': interfaces
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/network-binding', methods=['GET'])
+def get_network_binding():
+    """Get current network binding configuration"""
+    try:
+        config = load_config()
+        network_binding = config.get('network_binding', {
+            'bind_interface': 'all',  # 'all', 'wired', 'wireless', or specific interface name
+            'bind_address': '0.0.0.0'
+        })
+        
+        return jsonify({
+            'success': True,
+            'network_binding': network_binding
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/admin/network-binding', methods=['POST'])
+def update_network_binding():
+    """Update network binding configuration"""
+    try:
+        data = request.get_json()
+        bind_interface = data.get('bind_interface', 'all')
+        bind_address = data.get('bind_address', '0.0.0.0')
+        
+        # Validate bind_address
+        import ipaddress
+        try:
+            ipaddress.ip_address(bind_address)
+        except ValueError:
+            if bind_address != '0.0.0.0':
+                return jsonify({'success': False, 'message': 'Invalid IP address'}), 400
+        
+        config = load_config()
+        config['network_binding'] = {
+            'bind_interface': bind_interface,
+            'bind_address': bind_address
+        }
+        
+        if save_config(config):
+            return jsonify({
+                'success': True, 
+                'message': 'Network binding updated. Restart dashboard to apply changes.'
+            })
+        
+        return jsonify({'success': False, 'message': 'Failed to save configuration'}), 500
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/network-stats')
 def get_network_stats():
     """Get detailed statistics for each network"""
@@ -1737,13 +1892,90 @@ def create_default_config():
 if __name__ == '__main__':
     print(f"🚀 Starting MiniRack Dashboard {VERSION} (Simple Local macOS)")
     print(f"📁 Config directory: {LOCAL_DIR}")
-    print(f"🌐 Dashboard: http://localhost:3001")
     print("📱 Mobile responsive design enabled")
     print("🔧 Press Ctrl+C to stop")
     print("")
     
     # Create default config if needed
     create_default_config()
+    
+    # Load configuration
+    config = load_config()
+    
+    # Get network binding configuration
+    network_binding = config.get('network_binding', {
+        'bind_interface': 'all',
+        'bind_address': '0.0.0.0'
+    })
+    
+    # Determine bind address based on interface selection
+    bind_host = '0.0.0.0'  # Default to all interfaces
+    
+    if network_binding['bind_interface'] == 'wireless':
+        # Try to get wireless interface IP
+        try:
+            import subprocess
+            result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+            for line in result.stdout.split('\n'):
+                if 'wlan' in line or 'wlp' in line:
+                    # Found wireless interface, get its IP
+                    interface_lines = result.stdout.split(line)[1].split('\n')
+                    for iface_line in interface_lines:
+                        if 'inet ' in iface_line and '127.0.0.1' not in iface_line:
+                            ip_addr = iface_line.strip().split()[1].split('/')[0]
+                            bind_host = ip_addr
+                            break
+                    break
+        except:
+            logging.warning("Could not determine wireless interface IP, using all interfaces")
+    
+    elif network_binding['bind_interface'] == 'wired':
+        # Try to get wired interface IP
+        try:
+            import subprocess
+            result = subprocess.run(['ip', 'addr', 'show'], capture_output=True, text=True)
+            for line in result.stdout.split('\n'):
+                if 'eth' in line or 'enp' in line:
+                    # Found wired interface, get its IP
+                    interface_lines = result.stdout.split(line)[1].split('\n')
+                    for iface_line in interface_lines:
+                        if 'inet ' in iface_line and '127.0.0.1' not in iface_line:
+                            ip_addr = iface_line.strip().split()[1].split('/')[0]
+                            bind_host = ip_addr
+                            break
+                    break
+        except:
+            logging.warning("Could not determine wired interface IP, using all interfaces")
+    
+    elif network_binding['bind_interface'] != 'all':
+        # Specific interface name or IP address
+        if network_binding['bind_address'] != '0.0.0.0':
+            bind_host = network_binding['bind_address']
+    
+    # Check for SSL configuration
+    ssl_config_file = LOCAL_DIR.parent / "ssl_config.json"
+    ssl_context = None
+    port = 80
+    
+    if ssl_config_file.exists():
+        try:
+            with open(ssl_config_file, 'r') as f:
+                ssl_config = json.load(f)
+            
+            if ssl_config.get('ssl_enabled', False):
+                cert_file = ssl_config.get('cert_file')
+                key_file = ssl_config.get('key_file')
+                
+                if cert_file and key_file and Path(cert_file).exists() and Path(key_file).exists():
+                    ssl_context = (cert_file, key_file)
+                    port = ssl_config.get('ssl_port', 443)
+                    print(f"🔒 SSL enabled on port {port}")
+                else:
+                    print("⚠️  SSL configured but certificate files not found, using HTTP")
+        except Exception as e:
+            logging.warning(f"SSL configuration error: {e}")
+    
+    print(f"🌐 Dashboard: {'https' if ssl_context else 'http'}://{bind_host if bind_host != '0.0.0.0' else 'localhost'}:{port}")
     
     # Initial cache update
     try:
@@ -1757,13 +1989,15 @@ if __name__ == '__main__':
         logging.info(f"Starting Eero Dashboard {VERSION} for Raspberry Pi")
         logging.info(f"Configuration directory: {LOCAL_DIR}")
         logging.info(f"Template file: {TEMPLATE_FILE}")
+        logging.info(f"Binding to: {bind_host}:{port}")
         
         app.run(
-            host='0.0.0.0',  # Allow external connections
-            port=80,         # Standard HTTP port
+            host=bind_host,
+            port=port,
             debug=False,     # Disable debug mode for production
             threaded=True,   # Enable threading for better performance
-            use_reloader=False  # Disable reloader for systemd service
+            use_reloader=False,  # Disable reloader for systemd service
+            ssl_context=ssl_context
         )
     except KeyboardInterrupt:
         logging.info("Dashboard stopped by user")
