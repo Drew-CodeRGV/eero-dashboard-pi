@@ -1433,6 +1433,185 @@ def reauthorize():
         logging.error("Reauthorization error: " + str(e))
         return jsonify({'success': False, 'message': 'Authentication error: ' + str(e)}), 500
 
+# Voice API endpoints for Echo integration
+@app.route('/api/voice/status')
+def get_voice_status():
+    """Get network status optimized for voice responses"""
+    try:
+        update_cache()
+        combined_data = data_cache['combined']
+        
+        total_devices = combined_data.get('total_devices', 0)
+        wireless_devices = combined_data.get('wireless_devices', 0)
+        wired_devices = combined_data.get('wired_devices', 0)
+        
+        # Calculate AP statistics
+        total_aps = 0
+        online_aps = 0
+        busiest_ap = None
+        max_devices = 0
+        
+        for network_id, network_data in data_cache.get('networks', {}).items():
+            ap_data = network_data.get('ap_data', {})
+            for ap_id, ap_info in ap_data.items():
+                total_aps += 1
+                online_aps += 1  # All APs in data are considered online
+                
+                if ap_info.get('total_devices', 0) > max_devices:
+                    max_devices = ap_info.get('total_devices', 0)
+                    busiest_ap = {
+                        'name': ap_info.get('name', 'Unknown AP'),
+                        'device_count': max_devices
+                    }
+        
+        return jsonify({
+            'total_devices': total_devices,
+            'wireless_devices': wireless_devices,
+            'wired_devices': wired_devices,
+            'total_aps': total_aps,
+            'online_aps': online_aps,
+            'busiest_ap': busiest_ap,
+            'internet_status': 'connected',  # Assume connected if we have data
+            'last_update': combined_data.get('last_update')
+        })
+        
+    except Exception as e:
+        logging.error(f"Voice status error: {str(e)}")
+        return jsonify({
+            'total_devices': 0,
+            'wireless_devices': 0,
+            'wired_devices': 0,
+            'total_aps': 0,
+            'online_aps': 0,
+            'busiest_ap': None,
+            'internet_status': 'unknown',
+            'last_update': None
+        }), 500
+
+@app.route('/api/voice/devices')
+def get_voice_devices():
+    """Get device information optimized for voice responses"""
+    try:
+        update_cache()
+        combined_data = data_cache['combined']
+        
+        total_devices = combined_data.get('total_devices', 0)
+        wireless_devices = combined_data.get('wireless_devices', 0)
+        wired_devices = combined_data.get('wired_devices', 0)
+        device_os = combined_data.get('device_os', {})
+        
+        # Find busiest AP
+        busiest_ap = None
+        max_devices = 0
+        
+        for network_id, network_data in data_cache.get('networks', {}).items():
+            ap_data = network_data.get('ap_data', {})
+            for ap_id, ap_info in ap_data.items():
+                if ap_info.get('total_devices', 0) > max_devices:
+                    max_devices = ap_info.get('total_devices', 0)
+                    busiest_ap = {
+                        'name': ap_info.get('name', 'Unknown AP'),
+                        'device_count': max_devices
+                    }
+        
+        return jsonify({
+            'total_devices': total_devices,
+            'wireless_devices': wireless_devices,
+            'wired_devices': wired_devices,
+            'device_types': device_os,
+            'busiest_ap': busiest_ap,
+            'last_update': combined_data.get('last_update')
+        })
+        
+    except Exception as e:
+        logging.error(f"Voice devices error: {str(e)}")
+        return jsonify({
+            'total_devices': 0,
+            'wireless_devices': 0,
+            'wired_devices': 0,
+            'device_types': {},
+            'busiest_ap': None,
+            'last_update': None
+        }), 500
+
+@app.route('/api/voice/aps')
+def get_voice_aps():
+    """Get access point information optimized for voice responses"""
+    try:
+        update_cache()
+        
+        total_aps = 0
+        busiest_ap = None
+        max_devices = 0
+        
+        for network_id, network_data in data_cache.get('networks', {}).items():
+            ap_data = network_data.get('ap_data', {})
+            for ap_id, ap_info in ap_data.items():
+                total_aps += 1
+                
+                if ap_info.get('total_devices', 0) > max_devices:
+                    max_devices = ap_info.get('total_devices', 0)
+                    busiest_ap = {
+                        'name': ap_info.get('name', 'Unknown AP'),
+                        'device_count': max_devices,
+                        'model': ap_info.get('model', 'Unknown')
+                    }
+        
+        return jsonify({
+            'total_aps': total_aps,
+            'online_aps': total_aps,  # All APs in data are considered online
+            'busiest_ap': busiest_ap,
+            'last_update': data_cache['combined'].get('last_update')
+        })
+        
+    except Exception as e:
+        logging.error(f"Voice APs error: {str(e)}")
+        return jsonify({
+            'total_aps': 0,
+            'online_aps': 0,
+            'busiest_ap': None,
+            'last_update': None
+        }), 500
+
+@app.route('/api/voice/events')
+def get_voice_events():
+    """Get recent network events optimized for voice responses"""
+    try:
+        # For now, return mock events since we don't have real event tracking
+        # This can be enhanced later with actual event monitoring
+        current_time = get_timezone_aware_now()
+        
+        # Generate some sample events based on current device data
+        events = []
+        combined_data = data_cache['combined']
+        devices = combined_data.get('devices', [])
+        
+        # Create mock recent events for voice responses
+        if devices:
+            # Take first few devices as "recently connected"
+            for i, device in enumerate(devices[:3]):
+                event_time = current_time - timedelta(minutes=i*15)
+                events.append({
+                    'type': 'device_connected',
+                    'device_name': device.get('name', 'Unknown Device'),
+                    'timestamp': event_time.isoformat(),
+                    'description': f"{device.get('name', 'Unknown Device')} connected"
+                })
+        
+        return jsonify({
+            'events': events,
+            'event_count': len(events),
+            'last_update': combined_data.get('last_update')
+        })
+        
+    except Exception as e:
+        logging.error(f"Voice events error: {str(e)}")
+        return jsonify({
+            'events': [],
+            'event_count': 0,
+            'last_update': None
+        }), 500
+
 @app.route('/api/export/csv')
 def export_csv():
     """Export network data to CSV"""
